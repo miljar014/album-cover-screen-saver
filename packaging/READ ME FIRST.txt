@@ -1,0 +1,42 @@
+Album Cover Screen Saver
+========================
+
+INSTALL
+
+  1. Drag "Album Cover Screen Saver" onto the Applications folder shown here.
+  2. Open it from Applications. It puts a small grid icon in your menu bar and
+     installs the screen saver itself the first time it runs.
+  3. Click the menu bar icon and connect your music, if you want history and
+     now-playing art. It works without connecting anything, using whatever is
+     playing on this Mac.
+  4. System Settings > Screen Saver > Album Cover Screen Saver.
+
+That is the whole installation. There is nothing else to copy.
+
+
+THE FIRST TIME YOU OPEN IT
+
+  macOS may say the app was downloaded from the internet and ask whether you are
+  sure. That is normal for anything not from the App Store. This app is signed
+  and notarized by Apple, so you will get the plain "are you sure" and not a
+  warning about unidentified developers.
+
+
+UPDATES
+
+  The app checks for updates once a day and will offer to install them. You can
+  also check whenever you like: menu bar icon > Check for Updates. Updating the
+  app updates the screen saver with it.
+
+
+SETTINGS
+
+  Menu bar icon > Settings. Nineteen styles, each with its own controls: speed,
+  how many covers change at once, whether the featured cover follows what is
+  playing, and so on.
+
+
+REMOVING IT
+
+  Quit from the menu bar icon, drag the app to the Trash, and delete
+  ~/Library/Screen Savers/Album Cover Screen Saver.saver

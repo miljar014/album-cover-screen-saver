@@ -1,0 +1,423 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		78F0B55DEB88D0033DFCE310 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6685C57D942E9B04CFC3EF /* Store.swift */; };
+		E8565077666035E2F82157B2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56695B40B300A73EF7104B8 /* main.swift */; };
+		97668555A5D2F1CEB31B9CCA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 850DCEBEA981F20DEBD444D7 /* AppDelegate.swift */; };
+		5C7EA5D127FADF81FA53E039 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E36CB3F23A3FA1C24B1404 /* Config.swift */; };
+		12D0BBB90EE849245F8FF70C /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CD8E9CB2FC8772E8FD77DA3 /* Keychain.swift */; };
+		4470F0FF3BE3879A6975001D /* Poller.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF0499B0CAD0E42F43AF0C76 /* Poller.swift */; };
+		656088732A97BC14698AECD5 /* SpotifyAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987B30253AD7E9587038AD08 /* SpotifyAPI.swift */; };
+		C27FF14166646404D36F1274 /* SpotifyAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0C5DD2287EB9F62ADBD841 /* SpotifyAuth.swift */; };
+		EA9B32227B221D5D7A6B1F25 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6685C57D942E9B04CFC3EF /* Store.swift */; };
+		53E62C02716334954846BED8 /* AlbumCoverSaverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CF81A4EF01ED77450AEF68 /* AlbumCoverSaverView.swift */; };
+		720AFB3D93F4D6DB34066E11 /* Renderers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E457B67C3AAB9481A638DE /* Renderers.swift */; };
+		FEF25453B968F1BC4E0B1464 /* ConfigSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EAFA8AA73A13D5273998697 /* ConfigSheet.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		5F6685C57D942E9B04CFC3EF /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Store.swift"; sourceTree = "<group>"; };
+		F56695B40B300A73EF7104B8 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "main.swift"; sourceTree = "<group>"; };
+		850DCEBEA981F20DEBD444D7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate.swift"; sourceTree = "<group>"; };
+		20E36CB3F23A3FA1C24B1404 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Config.swift"; sourceTree = "<group>"; };
+		6CD8E9CB2FC8772E8FD77DA3 /* Keychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Keychain.swift"; sourceTree = "<group>"; };
+		DF0499B0CAD0E42F43AF0C76 /* Poller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Poller.swift"; sourceTree = "<group>"; };
+		987B30253AD7E9587038AD08 /* SpotifyAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SpotifyAPI.swift"; sourceTree = "<group>"; };
+		7F0C5DD2287EB9F62ADBD841 /* SpotifyAuth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SpotifyAuth.swift"; sourceTree = "<group>"; };
+		C1CF81A4EF01ED77450AEF68 /* AlbumCoverSaverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AlbumCoverSaverView.swift"; sourceTree = "<group>"; };
+		13E457B67C3AAB9481A638DE /* Renderers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Renderers.swift"; sourceTree = "<group>"; };
+		0EAFA8AA73A13D5273998697 /* ConfigSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ConfigSheet.swift"; sourceTree = "<group>"; };
+		BE910DB433E00A77CA2AB554 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
+		FD187D6502C590AECC495706 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info.plist"; sourceTree = "<group>"; };
+		004DF768771E09DB764CC8DA /* Saver.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Saver.entitlements"; sourceTree = "<group>"; };
+		4FF25973EC7250D102E2C3D3 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "README.md"; sourceTree = "<group>"; };
+		6D98054B4BC2969C8D521EB0 /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Makefile"; sourceTree = "<group>"; };
+		9F175B98D7516620A7EFC3FA /* AlbumCoverScreenSaver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AlbumCoverScreenSaver.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CE6D0C0786AA47B65C70525 /* AlbumCoverScreenSaver.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AlbumCoverScreenSaver.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2217102B93D891C035CBF0F1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5BF537A3E0DAEE681C4E6A33 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8D63A7AACC69E4EB29FD7BA8 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				5F6685C57D942E9B04CFC3EF /* Store.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		C2823A7CEAA4F28F5BD35AA6 /* Companion */ = {
+			isa = PBXGroup;
+			children = (
+				F56695B40B300A73EF7104B8 /* main.swift */,
+				850DCEBEA981F20DEBD444D7 /* AppDelegate.swift */,
+				20E36CB3F23A3FA1C24B1404 /* Config.swift */,
+				6CD8E9CB2FC8772E8FD77DA3 /* Keychain.swift */,
+				DF0499B0CAD0E42F43AF0C76 /* Poller.swift */,
+				987B30253AD7E9587038AD08 /* SpotifyAPI.swift */,
+				7F0C5DD2287EB9F62ADBD841 /* SpotifyAuth.swift */,
+				BE910DB433E00A77CA2AB554 /* Info.plist */,
+			);
+			path = Companion;
+			sourceTree = "<group>";
+		};
+		6669CC078EC15DEDD4771808 /* Saver */ = {
+			isa = PBXGroup;
+			children = (
+				C1CF81A4EF01ED77450AEF68 /* AlbumCoverSaverView.swift */,
+				13E457B67C3AAB9481A638DE /* Renderers.swift */,
+				0EAFA8AA73A13D5273998697 /* ConfigSheet.swift */,
+				FD187D6502C590AECC495706 /* Info.plist */,
+				004DF768771E09DB764CC8DA /* Saver.entitlements */,
+			);
+			path = Saver;
+			sourceTree = "<group>";
+		};
+		070F258760FAB4E9EF0D9C2A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9F175B98D7516620A7EFC3FA /* AlbumCoverScreenSaver.app */,
+				0CE6D0C0786AA47B65C70525 /* AlbumCoverScreenSaver.saver */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C0D0992446E1DBF90BD2C6E3 /*  */ = {
+			isa = PBXGroup;
+			children = (
+				8D63A7AACC69E4EB29FD7BA8 /* Shared */,
+				C2823A7CEAA4F28F5BD35AA6 /* Companion */,
+				6669CC078EC15DEDD4771808 /* Saver */,
+				4FF25973EC7250D102E2C3D3 /* README.md */,
+				6D98054B4BC2969C8D521EB0 /* Makefile */,
+				070F258760FAB4E9EF0D9C2A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F818D004285DD7DD31835979 /* AlbumCoverScreenSaver */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A270A713FF5EC9FCD22D23C;
+			buildPhases = (
+				1F07B4AFB187D2FF2AA3911D /* Sources */,
+				2217102B93D891C035CBF0F1 /* Frameworks */,
+				281D40F63D61C40D94D6E872 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AlbumCoverScreenSaver;
+			productName = AlbumCoverScreenSaver;
+			productReference = 9F175B98D7516620A7EFC3FA /* AlbumCoverScreenSaver.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9096AA1B375F0F6C1608A9E4 /* AlbumCoverSaverModule */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B7D0881BEDE98F21EF80BFE;
+			buildPhases = (
+				7EA997B82BAD89B5675A1A1B /* Sources */,
+				5BF537A3E0DAEE681C4E6A33 /* Frameworks */,
+				1633A213983DA8278972975F /* Resources */,
+				DB31A3EF2CB14F00C7872707 /* Install to Screen Savers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AlbumCoverSaverModule;
+			productName = AlbumCoverScreenSaver;
+			productReference = 0CE6D0C0786AA47B65C70525 /* AlbumCoverScreenSaver.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					F818D004285DD7DD31835979 = {CreatedOnToolsVersion = 15.0;};
+					9096AA1B375F0F6C1608A9E4 = {CreatedOnToolsVersion = 15.0;};
+				};
+			};
+			buildConfigurationList = 1A919B08B9596F7DB6AE5808;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C0D0992446E1DBF90BD2C6E3;
+			productRefGroup = 070F258760FAB4E9EF0D9C2A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F818D004285DD7DD31835979 /* AlbumCoverScreenSaver */,
+				9096AA1B375F0F6C1608A9E4 /* AlbumCoverSaverModule */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		281D40F63D61C40D94D6E872 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1633A213983DA8278972975F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DB31A3EF2CB14F00C7872707 /* Install to Screen Savers */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Install to Screen Savers";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ] || [ \"$INSTALL_SAVER\" = \"1\" ]; then\n  DEST=\"$HOME/Library/Screen Savers\"\n  mkdir -p \"$DEST\"\n  rm -rf \"$DEST/$FULL_PRODUCT_NAME\"\n  cp -R \"$BUILT_PRODUCTS_DIR/$FULL_PRODUCT_NAME\" \"$DEST/\"\n  echo \"note: installed to $DEST/$FULL_PRODUCT_NAME\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1F07B4AFB187D2FF2AA3911D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78F0B55DEB88D0033DFCE310 /* Store.swift in Sources */,
+				E8565077666035E2F82157B2 /* main.swift in Sources */,
+				97668555A5D2F1CEB31B9CCA /* AppDelegate.swift in Sources */,
+				5C7EA5D127FADF81FA53E039 /* Config.swift in Sources */,
+				12D0BBB90EE849245F8FF70C /* Keychain.swift in Sources */,
+				4470F0FF3BE3879A6975001D /* Poller.swift in Sources */,
+				656088732A97BC14698AECD5 /* SpotifyAPI.swift in Sources */,
+				C27FF14166646404D36F1274 /* SpotifyAuth.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EA997B82BAD89B5675A1A1B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA9B32227B221D5D7A6B1F25 /* Store.swift in Sources */,
+				53E62C02716334954846BED8 /* AlbumCoverSaverView.swift in Sources */,
+				720AFB3D93F4D6DB34066E11 /* Renderers.swift in Sources */,
+				FEF25453B968F1BC4E0B1464 /* ConfigSheet.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		96BBE0AE11FEDBC5E2960110 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B6888466AEA5E136F460CF40 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		04155DA2243952FAA2795850 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Companion/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaredmiller.AlbumCoverScreenSaver;
+				PRODUCT_NAME = AlbumCoverScreenSaver;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Debug;
+		};
+		BF6051547C30D43DE67EFBCF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Companion/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaredmiller.AlbumCoverScreenSaver;
+				PRODUCT_NAME = AlbumCoverScreenSaver;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+			};
+			name = Release;
+		};
+		83D63646BA748478CBF2A79B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Saver/Saver.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Saver/Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				MACH_O_TYPE = mh_bundle;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaredmiller.AlbumCoverScreenSaver.saver;
+				PRODUCT_NAME = AlbumCoverScreenSaver;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SAVER_TARGET;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Debug;
+		};
+		EC0ED84100D9415E3CB6FD01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Saver/Saver.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Saver/Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Screen Savers";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks";
+				MACH_O_TYPE = mh_bundle;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaredmiller.AlbumCoverScreenSaver.saver;
+				PRODUCT_NAME = AlbumCoverScreenSaver;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SAVER_TARGET;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				WRAPPER_EXTENSION = saver;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1A919B08B9596F7DB6AE5808 /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				96BBE0AE11FEDBC5E2960110 /* Debug */,
+				B6888466AEA5E136F460CF40 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5A270A713FF5EC9FCD22D23C /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04155DA2243952FAA2795850 /* Debug */,
+				BF6051547C30D43DE67EFBCF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1B7D0881BEDE98F21EF80BFE /* Build configuration list */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83D63646BA748478CBF2A79B /* Debug */,
+				EC0ED84100D9415E3CB6FD01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}

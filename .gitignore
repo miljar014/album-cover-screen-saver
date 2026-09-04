@@ -1,0 +1,12 @@
+build/
+Vendor/
+releases/*.zip
+.DS_Store
+*.log
+Release.config
+# Baked into the binary at build time; no reason to publish them as text.
+ClientID
+LastFMKey
+# The public half of the update key is safe to publish. The private half must
+# never be committed -- back it up somewhere off this machine instead.
+sparkle-private-key.txt
