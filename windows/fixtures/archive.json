@@ -1,0 +1,96 @@
+{
+  "albums": {
+    "lfm-harbour-lights-slow-tide": {
+      "id": "lfm-harbour-lights-slow-tide",
+      "name": "Slow Tide",
+      "artist": "Harbour Lights",
+      "imageURL": "https://example.invalid/art/lfm-harbour-lights-slow-tide.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-09T03:41:18Z",
+      "playCount": 12
+    },
+    "lfm-the-paper-kites-society-winter-radio": {
+      "id": "lfm-the-paper-kites-society-winter-radio",
+      "name": "Winter Radio",
+      "artist": "The Paper Kites Society",
+      "imageURL": "https://example.invalid/art/lfm-the-paper-kites-society-winter-radio.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-09T02:58:44Z",
+      "playCount": 9
+    },
+    "lfm-cold-signal-static-bloom": {
+      "id": "lfm-cold-signal-static-bloom",
+      "name": "Static Bloom",
+      "artist": "Cold Signal",
+      "imageURL": "https://example.invalid/art/lfm-cold-signal-static-bloom.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-08T23:12:05Z",
+      "playCount": 7
+    },
+    "lfm-marguerite-vale-long-way-down": {
+      "id": "lfm-marguerite-vale-long-way-down",
+      "name": "Long Way Down",
+      "artist": "Marguerite Vale",
+      "imageURL": "https://example.invalid/art/lfm-marguerite-vale-long-way-down.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-08T21:03:31Z",
+      "playCount": 5
+    },
+    "lfm-otis---the-overpass-nightshift-gospel": {
+      "id": "lfm-otis---the-overpass-nightshift-gospel",
+      "name": "Nightshift Gospel",
+      "artist": "Otis & The Overpass",
+      "imageURL": "https://example.invalid/art/lfm-otis---the-overpass-nightshift-gospel.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-08T19:47:52Z",
+      "playCount": 4
+    },
+    "lfm-field-recordings-sixteen-rooms": {
+      "id": "lfm-field-recordings-sixteen-rooms",
+      "name": "Sixteen Rooms",
+      "artist": "Field Recordings",
+      "imageURL": "https://example.invalid/art/lfm-field-recordings-sixteen-rooms.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-07T22:15:09Z",
+      "playCount": 3
+    },
+    "lfm-anna-bell-crow-terracotta": {
+      "id": "lfm-anna-bell-crow-terracotta",
+      "name": "Terracotta",
+      "artist": "Anna Bell Crow",
+      "imageURL": "https://example.invalid/art/lfm-anna-bell-crow-terracotta.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 2
+    },
+    "lfm-the-quiet-machines-analogue-heart": {
+      "id": "lfm-the-quiet-machines-analogue-heart",
+      "name": "Analogue Heart",
+      "artist": "The Quiet Machines",
+      "imageURL": "https://example.invalid/art/lfm-the-quiet-machines-analogue-heart.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 2
+    },
+    "lfm-sunday-driver-blue-hour": {
+      "id": "lfm-sunday-driver-blue-hour",
+      "name": "Blue Hour",
+      "artist": "Sunday Driver",
+      "imageURL": "https://example.invalid/art/lfm-sunday-driver-blue-hour.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 1
+    },
+    "lfm-ravensmoor-the-long-field": {
+      "id": "lfm-ravensmoor-the-long-field",
+      "name": "The Long Field",
+      "artist": "Ravensmoor",
+      "imageURL": "https://example.invalid/art/lfm-ravensmoor-the-long-field.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 1
+    }
+  },
+  "lastCursorMs": 1788561066092,
+  "updated": "2026-09-09T03:41:18Z"
+}

@@ -1,0 +1,26 @@
+<Project>
+
+  <!--
+    Settings shared by every project in the Windows build.
+
+    The shared library deliberately targets plain net8.0 rather than a
+    Windows-specific framework. Nothing in the data contract needs Windows, and
+    keeping it portable means the contract can be built and tested anywhere,
+    which is how it gets tested at all when a Windows shell is not available.
+    The tray app and the screen saver target net8.0-windows10.0.19041.0 and
+    reference this library; that direction works, the reverse would not.
+  -->
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <Product>Album Cover Screen Saver</Product>
+    <Company>Jared Miller</Company>
+    <!-- Windows versions independently of macOS. See doc 00 section 11. -->
+    <Version>1.0.0</Version>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+</Project>

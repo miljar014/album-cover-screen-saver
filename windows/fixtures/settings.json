@@ -1,0 +1,9 @@
+{
+  "mode": "mosaic",
+  "tileSize": 200,
+  "tempo": 4.0,
+  "recencyBias": 0.4,
+  "showTrackLabel": true,
+  "multiMonitor": "separate",
+  "displays": {}
+}

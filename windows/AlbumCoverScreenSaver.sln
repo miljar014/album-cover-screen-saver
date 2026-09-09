@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B516BD0E-17DC-4669-B811-8947C594D82D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlbumCoverScreenSaver.Shared", "src\AlbumCoverScreenSaver.Shared\AlbumCoverScreenSaver.Shared.csproj", "{C4EDE8E0-6733-43A0-BFF9-35B56779E42F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C437C5FF-F66F-456A-81C7-85C80595D551}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlbumCoverScreenSaver.Shared.Tests", "tests\AlbumCoverScreenSaver.Shared.Tests\AlbumCoverScreenSaver.Shared.Tests.csproj", "{9FC517D1-53C5-495D-80B3-2639324F9FC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4EDE8E0-6733-43A0-BFF9-35B56779E42F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4EDE8E0-6733-43A0-BFF9-35B56779E42F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4EDE8E0-6733-43A0-BFF9-35B56779E42F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4EDE8E0-6733-43A0-BFF9-35B56779E42F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FC517D1-53C5-495D-80B3-2639324F9FC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FC517D1-53C5-495D-80B3-2639324F9FC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FC517D1-53C5-495D-80B3-2639324F9FC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FC517D1-53C5-495D-80B3-2639324F9FC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C4EDE8E0-6733-43A0-BFF9-35B56779E42F} = {B516BD0E-17DC-4669-B811-8947C594D82D}
+		{9FC517D1-53C5-495D-80B3-2639324F9FC5} = {C437C5FF-F66F-456A-81C7-85C80595D551}
+	EndGlobalSection
+EndGlobal

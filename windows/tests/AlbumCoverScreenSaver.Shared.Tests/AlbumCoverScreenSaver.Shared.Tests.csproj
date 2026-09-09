@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    A plain console app, not an xunit project, and deliberately so.
+
+    The tests have no package dependencies at all, which means `dotnet run`
+    works on a machine that has never restored a NuGet package and on a network
+    that cannot reach nuget.org. For a project whose whole point is to be built
+    on two different Windows machines by someone who does not write code, a test
+    suite that cannot fail to restore is worth more than a nicer assertion
+    syntax.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>AlbumCoverScreenSaver.Shared.Tests</RootNamespace>
+    <AssemblyName>AlbumCoverScreenSaver.Shared.Tests</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AlbumCoverScreenSaver.Shared\AlbumCoverScreenSaver.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

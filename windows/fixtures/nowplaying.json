@@ -1,0 +1,11 @@
+{
+  "albumID": "lfm-harbour-lights-slow-tide",
+  "albumName": "Slow Tide",
+  "artist": "Harbour Lights",
+  "track": "Slow Tide",
+  "imageURL": "https://example.invalid/art/lfm-harbour-lights-slow-tide.jpg",
+  "isPlaying": true,
+  "updated": "2026-09-09T03:41:18Z",
+  "progressMs": 84000,
+  "durationMs": 213000
+}
