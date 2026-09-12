@@ -282,6 +282,55 @@ public static class FeaturedTests
 
     private static void Edges(TestRunner runner)
     {
+        runner.Group("Featured album: how long it has been up");
+
+        runner.Add("the clock for how long an album has been up runs while music plays", () =>
+        {
+            // This is the whole reason it is a separate field from the idle
+            // clock. The idle clock is held at the current moment for every
+            // frame the music is on, so an age measured from it would read zero
+            // for as long as a record was playing. CRT Terminal types its
+            // readout out of this one, and on the idle clock it would never
+            // finish a line while you were listening.
+            var featured = New();
+            featured.Reset(0, 3);
+
+            var phase = Run(featured, 0, 10, live: 3, idleSpan: 30, albums: 20);
+
+            Check.Equal(3, featured.Index, "still the album that is playing");
+            Check.True(
+                phase - featured.ShownSince > 9.0,
+                $"it has been up {phase - featured.ShownSince:0.0}s and should be about ten");
+        });
+
+        runner.Add("it restarts when a change begins, not when it lands", () =>
+        {
+            // A deliberate departure from the specification, which resets on
+            // completion and therefore shows the incoming album's words already
+            // fully typed for a second and a third before wiping and typing
+            // them again.
+            var featured = New();
+            featured.Reset(0, 3);
+
+            featured.Advance(5, 7, 30, albumCount: 20);
+
+            Check.Equal(7, featured.Index, "the change has begun");
+            Check.True(featured.IsChanging, "and is still in flight");
+            Check.Close(5.0, featured.ShownSince, 0.0001, "the clock restarted with it");
+        });
+
+        runner.Add("it is not disturbed by a change landing", () =>
+        {
+            var featured = New();
+            featured.Reset(0, 3);
+
+            featured.Advance(5, 7, 30, albumCount: 20);
+            Run(featured, 5, 3, live: 7, idleSpan: 30, albums: 20);
+
+            Check.False(featured.IsChanging, "the change has landed");
+            Check.Close(5.0, featured.ShownSince, 0.0001, "and the clock still runs from when it began");
+        });
+
         runner.Group("Featured album: the awkward cases");
 
         runner.Add("an empty archive is left alone rather than crashed on", () =>

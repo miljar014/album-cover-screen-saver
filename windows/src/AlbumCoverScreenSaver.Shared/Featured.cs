@@ -51,6 +51,30 @@ public sealed class Featured
     /// <summary>The one it is replacing, which is the same once a change lands.</summary>
     public int PreviousIndex { get; private set; }
 
+    /// <summary>
+    /// The moment the album now on show was chosen.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Not the same thing as the idle clock, which is why it is a separate
+    /// field. The idle clock is held forward for every frame the music is
+    /// playing, so anything measuring an age from it would read zero for as
+    /// long as a record was on. CRT Terminal types its readout out one
+    /// character at a time from this, and driving that from the idle clock
+    /// would mean the terminal never finished a line while you were listening.
+    /// </para>
+    /// <para>
+    /// <b>A deliberate departure from the specification</b>, which has only the
+    /// one clock and resets it when a change <em>completes</em>. That leaves a
+    /// second and a third of a second in which the incoming album's text is
+    /// already on screen and already fully typed, before it wipes and types
+    /// itself again. This is set when the change <em>begins</em> instead, so the
+    /// readout retypes while the picture is still fading in, which is what the
+    /// effect is plainly meant to look like.
+    /// </para>
+    /// </remarks>
+    public double ShownSince { get; private set; }
+
     public bool IsChanging => _changeStart >= 0;
 
     /// <summary>
@@ -120,6 +144,7 @@ public sealed class Featured
         PreviousIndex = Index;
         Index = next;
         _changeStart = phase;
+        ShownSince = phase;
     }
 
     /// <summary>How far through a change we are, 0 to 1, and 1 when not changing.</summary>
@@ -138,5 +163,6 @@ public sealed class Featured
         PreviousIndex = index;
         _changeStart = -1;
         _startedAt = phase;
+        ShownSince = phase;
     }
 }

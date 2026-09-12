@@ -84,6 +84,11 @@ internal sealed class Scene : IDisposable
 
         _styles[CollageMode.Newsstand] =
             new NewsstandRenderer(data, picker, _palettes, _halftones);
+
+        // Shares the halftone grid with Newsstand, which is why they were built
+        // one after the other.
+        _styles[CollageMode.Crt] =
+            new CrtRenderer(data, picker, _halftones);
     }
 
     /// <summary>

@@ -22,6 +22,7 @@ public static class Program
         SceneMathTests.Register(runner);
         DrumAndPlatformTests.Register(runner);
         HalftoneTests.Register(runner);
+        CrtTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);
