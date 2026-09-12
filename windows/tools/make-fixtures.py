@@ -2,14 +2,18 @@
 """
 Builds the fixture data in windows/fixtures.
 
-The tray app does not exist until step 4, so steps 2 and 3 need something to
-draw. This writes a small archive, a now-playing snapshot, a settings file and
-one cover per album, all valid against the contract in doc 00 section 3.
+The tray app does not exist until step 4, so the earlier steps need something to
+draw. This writes an archive, a now-playing snapshot, a settings file and one
+cover per album, all valid against the contract in doc 00 section 3.
 
-The artists and albums are invented. The covers are abstract compositions
-generated from the album id, so they are original artwork and every one of them
-is clearly distinguishable from the others on screen, which is what makes a
-grid of them useful for checking a renderer.
+The artists and albums are invented and the covers are abstract compositions
+generated from the album id, so they are original artwork.
+
+**No text is drawn on the covers.** Real album art is not captioned, and a
+grid style is judged on how the covers read together. An earlier version wrote
+the album and artist onto every cover, which made a wall of them look like a
+wall of labels. The only caption the screen saver draws is its own, once, in
+the corner.
 
 Run from anywhere:  python3 windows/tools/make-fixtures.py
 """
@@ -23,7 +27,7 @@ import math
 import pathlib
 import random
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "fixtures"
@@ -32,6 +36,9 @@ ART = FIXTURES / "art"
 SIZE = 600
 
 # (artist, album, play count, played at, or None for a seeded entry)
+#
+# Enough of them that a full screen grid is not mostly repeats. A 4K screen at
+# 200% holds about 60 tiles, so ten albums meant every cover appeared six times.
 ALBUMS = [
     ("Harbour Lights", "Slow Tide", 12, "2026-09-09T03:41:18Z"),
     ("The Paper Kites Society", "Winter Radio", 9, "2026-09-09T02:58:44Z"),
@@ -39,10 +46,24 @@ ALBUMS = [
     ("Marguerite Vale", "Long Way Down", 5, "2026-09-08T21:03:31Z"),
     ("Otis & The Overpass", "Nightshift Gospel", 4, "2026-09-08T19:47:52Z"),
     ("Field Recordings", "Sixteen Rooms", 3, "2026-09-07T22:15:09Z"),
-    ("Anna Bell Crow", "Terracotta", 2, None),
-    ("The Quiet Machines", "Analogue Heart", 2, None),
-    ("Sunday Driver", "Blue Hour", 1, None),
-    ("Ravensmoor", "The Long Field", 1, None),
+    ("Anna Bell Crow", "Terracotta", 6, "2026-09-07T20:41:00Z"),
+    ("The Quiet Machines", "Analogue Heart", 3, "2026-09-07T18:22:47Z"),
+    ("Sunday Driver", "Blue Hour", 2, "2026-09-06T23:55:12Z"),
+    ("Ravensmoor", "The Long Field", 2, "2026-09-06T21:30:38Z"),
+    ("Lantern Club", "Paper Moon", 8, "2026-09-06T17:04:21Z"),
+    ("Delta Fern", "Riverbend", 5, "2026-09-05T22:48:03Z"),
+    ("Nine Mile Radio", "Dust and Gold", 4, "2026-09-05T20:11:59Z"),
+    ("Hollow Coast", "Tidewater", 3, "2026-09-05T16:37:44Z"),
+    ("The Ivory Hours", "Small Hours", 7, "2026-09-04T23:29:16Z"),
+    ("Junco Pass", "Winterlight", 2, "2026-09-04T19:52:30Z"),
+    ("Saltmarsh", "Low Country", 4, None),
+    ("Bright Antenna", "Signal Fire", 3, None),
+    ("The Cartographers", "Northing", 2, None),
+    ("Wren & Sparrow", "Common Ground", 5, None),
+    ("Glasshouse Choir", "Evensong", 2, None),
+    ("Motel Cassette", "Vacancy", 3, None),
+    ("The Orchard Line", "Windfall", 1, None),
+    ("Copperfield Green", "Thistledown", 1, None),
 ]
 
 # Seeded albums sit one second after the epoch, exactly as the macOS build does,
@@ -59,60 +80,58 @@ def make_id(artist: str, album: str) -> str:
     return "lfm-" + safe[:80]
 
 
-def palette(seed: int) -> list[tuple[int, int, int]]:
-    rng = random.Random(seed)
+def palette(rng: random.Random, count: int = 6) -> list[tuple[int, int, int]]:
     base = rng.random()
+    spread = rng.uniform(0.05, 0.22)
     shades = []
-    for step in range(5):
-        hue = (base + step * rng.uniform(0.06, 0.16)) % 1.0
-        saturation = rng.uniform(0.35, 0.85)
-        value = rng.uniform(0.30, 0.95)
+    for step in range(count):
+        hue = (base + (step * spread)) % 1.0
+        saturation = rng.uniform(0.30, 0.88)
+        value = rng.uniform(0.28, 0.96)
         r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
         shades.append((int(r * 255), int(g * 255), int(b * 255)))
     return shades
 
 
-def font(size: int):
-    for candidate in (
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    ):
-        if pathlib.Path(candidate).exists():
-            return ImageFont.truetype(candidate, size)
-    return ImageFont.load_default()
-
-
-def cover(artist: str, album: str, album_id: str) -> Image.Image:
+def cover(album_id: str) -> Image.Image:
     seed = int(hashlib.sha256(album_id.encode()).hexdigest()[:12], 16)
     rng = random.Random(seed)
-    shades = palette(seed)
+    shades = palette(rng)
 
     image = Image.new("RGB", (SIZE, SIZE), shades[0])
     draw = ImageDraw.Draw(image, "RGBA")
 
-    style = seed % 4
+    style = seed % 7
 
     if style == 0:  # stacked bands
         y = 0
         while y < SIZE:
-            height = rng.randint(30, 110)
+            height = rng.randint(24, 120)
             draw.rectangle([0, y, SIZE, y + height], fill=rng.choice(shades[1:]))
             y += height
-    elif style == 1:  # concentric arcs
-        for step in range(14, 0, -1):
-            radius = SIZE * step / 14 * 0.72
-            box = [SIZE / 2 - radius, SIZE * 0.42 - radius, SIZE / 2 + radius, SIZE * 0.42 + radius]
-            draw.ellipse(box, fill=shades[step % len(shades)])
+
+    elif style == 1:  # concentric rings, off centre
+        cx = SIZE * rng.uniform(0.35, 0.65)
+        cy = SIZE * rng.uniform(0.35, 0.65)
+        rings = rng.randint(9, 16)
+        for step in range(rings, 0, -1):
+            radius = SIZE * step / rings * rng.uniform(0.62, 0.80)
+            draw.ellipse(
+                [cx - radius, cy - radius, cx + radius, cy + radius],
+                fill=shades[step % len(shades)],
+            )
+
     elif style == 2:  # diagonal shards
-        for _ in range(9):
+        for _ in range(rng.randint(6, 12)):
             x = rng.randint(-SIZE // 2, SIZE)
-            width = rng.randint(40, 150)
+            width = rng.randint(30, 160)
             draw.polygon(
                 [(x, 0), (x + width, 0), (x + width - SIZE // 2, SIZE), (x - SIZE // 2, SIZE)],
                 fill=rng.choice(shades[1:]),
             )
-    else:  # grid of blocks
-        cells = rng.choice([3, 4, 6])
+
+    elif style == 3:  # grid of blocks
+        cells = rng.choice([3, 4, 5, 6])
         cell = SIZE / cells
         for row in range(cells):
             for column in range(cells):
@@ -121,29 +140,41 @@ def cover(artist: str, album: str, album_id: str) -> Image.Image:
                     fill=rng.choice(shades),
                 )
 
-    # A dark band along the bottom so the text is legible on any palette.
-    draw.rectangle([0, SIZE - 165, SIZE, SIZE], fill=(0, 0, 0, 190))
+    elif style == 4:  # split field with a disc
+        draw.rectangle([0, 0, SIZE, SIZE * rng.uniform(0.35, 0.65)], fill=shades[1])
+        radius = SIZE * rng.uniform(0.18, 0.30)
+        cx = SIZE * rng.uniform(0.30, 0.70)
+        cy = SIZE * rng.uniform(0.32, 0.58)
+        draw.ellipse([cx - radius, cy - radius, cx + radius, cy + radius], fill=shades[3])
+        draw.rectangle([0, SIZE * 0.78, SIZE, SIZE * 0.82], fill=shades[4])
 
-    album_font = font(46)
-    artist_font = font(30)
+    elif style == 5:  # scattered dots on a plain ground
+        image.paste(shades[1], [0, 0, SIZE, SIZE])
+        for _ in range(rng.randint(18, 60)):
+            radius = rng.uniform(SIZE * 0.02, SIZE * 0.12)
+            cx = rng.uniform(0, SIZE)
+            cy = rng.uniform(0, SIZE)
+            draw.ellipse(
+                [cx - radius, cy - radius, cx + radius, cy + radius],
+                fill=rng.choice(shades[2:]),
+            )
 
-    def fit(text: str, start: int, minimum: int, limit: int):
-        size = start
-        while size > minimum:
-            candidate = font(size)
-            if draw.textlength(text, font=candidate) <= limit:
-                return candidate
-            size -= 2
-        return font(minimum)
+    else:  # nested rectangles
+        inset = 0
+        index = 1
+        while inset < SIZE / 2:
+            draw.rectangle(
+                [inset, inset, SIZE - inset, SIZE - inset],
+                fill=shades[index % len(shades)],
+            )
+            inset += rng.randint(18, 60)
+            index += 1
 
-    album_font = fit(album, 46, 22, SIZE - 80)
-    artist_font = fit(artist.upper(), 30, 16, SIZE - 80)
-
-    draw.text((40, SIZE - 132), album, font=album_font, fill=(255, 255, 255))
-    draw.text((40, SIZE - 70), artist.upper(), font=artist_font, fill=(235, 235, 235))
-
-    # A thin accent rule, so a cover reduced to a thumbnail still has an edge.
-    draw.rectangle([0, SIZE - 168, SIZE, SIZE - 165], fill=shades[2])
+    # A quiet vignette, so a wall of covers has some depth rather than reading
+    # as flat colour swatches.
+    for step in range(28):
+        alpha = int(3 + (step * 1.4))
+        draw.rectangle([step, step, SIZE - step, SIZE - step], outline=(0, 0, 0, alpha))
 
     return image
 
@@ -159,9 +190,7 @@ def main() -> None:
         album_id = make_id(artist, album)
         last_played = played or SEEDED
 
-        cover(artist, album, album_id).save(
-            ART / f"{album_id}.jpg", "JPEG", quality=88, optimize=True
-        )
+        cover(album_id).save(ART / f"{album_id}.jpg", "JPEG", quality=88, optimize=True)
 
         albums[album_id] = {
             "id": album_id,

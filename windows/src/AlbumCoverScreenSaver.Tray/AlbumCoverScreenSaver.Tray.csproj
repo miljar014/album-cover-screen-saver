@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      The Windows 10.0.19041 target is what brings in the WinRT projection, and
+      that is the whole reason this project is on a different framework from the
+      screen saver: GlobalSystemMediaTransportControlsSessionManager lives
+      there. No NuGet package is needed for it.
+
+      19041 is Windows 10 version 2004, which is also the minimum the product
+      supports, because that is the build where the media session API appeared.
+    -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>AlbumCoverScreenSaver.Tray</RootNamespace>
+    <AssemblyName>AlbumCoverScreenSaver.Tray</AssemblyName>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Embedded, so the running app never depends on a file beside it. -->
+    <EmbeddedResource Include="app.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlbumCoverScreenSaver.Shared\AlbumCoverScreenSaver.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

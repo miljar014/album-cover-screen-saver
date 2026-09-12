@@ -8,3 +8,6 @@ obj/
 # Published output and installers
 publish/
 Releases/
+
+# Logs written by the build and by the saver itself
+*.log

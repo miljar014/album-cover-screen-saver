@@ -60,8 +60,8 @@
       "artist": "Anna Bell Crow",
       "imageURL": "https://example.invalid/art/lfm-anna-bell-crow-terracotta.jpg",
       "firstSeen": "2026-09-01T12:00:00Z",
-      "lastPlayed": "1970-01-01T00:00:01Z",
-      "playCount": 2
+      "lastPlayed": "2026-09-07T20:41:00Z",
+      "playCount": 6
     },
     "lfm-the-quiet-machines-analogue-heart": {
       "id": "lfm-the-quiet-machines-analogue-heart",
@@ -69,8 +69,8 @@
       "artist": "The Quiet Machines",
       "imageURL": "https://example.invalid/art/lfm-the-quiet-machines-analogue-heart.jpg",
       "firstSeen": "2026-09-01T12:00:00Z",
-      "lastPlayed": "1970-01-01T00:00:01Z",
-      "playCount": 2
+      "lastPlayed": "2026-09-07T18:22:47Z",
+      "playCount": 3
     },
     "lfm-sunday-driver-blue-hour": {
       "id": "lfm-sunday-driver-blue-hour",
@@ -78,14 +78,140 @@
       "artist": "Sunday Driver",
       "imageURL": "https://example.invalid/art/lfm-sunday-driver-blue-hour.jpg",
       "firstSeen": "2026-09-01T12:00:00Z",
-      "lastPlayed": "1970-01-01T00:00:01Z",
-      "playCount": 1
+      "lastPlayed": "2026-09-06T23:55:12Z",
+      "playCount": 2
     },
     "lfm-ravensmoor-the-long-field": {
       "id": "lfm-ravensmoor-the-long-field",
       "name": "The Long Field",
       "artist": "Ravensmoor",
       "imageURL": "https://example.invalid/art/lfm-ravensmoor-the-long-field.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-06T21:30:38Z",
+      "playCount": 2
+    },
+    "lfm-lantern-club-paper-moon": {
+      "id": "lfm-lantern-club-paper-moon",
+      "name": "Paper Moon",
+      "artist": "Lantern Club",
+      "imageURL": "https://example.invalid/art/lfm-lantern-club-paper-moon.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-06T17:04:21Z",
+      "playCount": 8
+    },
+    "lfm-delta-fern-riverbend": {
+      "id": "lfm-delta-fern-riverbend",
+      "name": "Riverbend",
+      "artist": "Delta Fern",
+      "imageURL": "https://example.invalid/art/lfm-delta-fern-riverbend.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-05T22:48:03Z",
+      "playCount": 5
+    },
+    "lfm-nine-mile-radio-dust-and-gold": {
+      "id": "lfm-nine-mile-radio-dust-and-gold",
+      "name": "Dust and Gold",
+      "artist": "Nine Mile Radio",
+      "imageURL": "https://example.invalid/art/lfm-nine-mile-radio-dust-and-gold.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-05T20:11:59Z",
+      "playCount": 4
+    },
+    "lfm-hollow-coast-tidewater": {
+      "id": "lfm-hollow-coast-tidewater",
+      "name": "Tidewater",
+      "artist": "Hollow Coast",
+      "imageURL": "https://example.invalid/art/lfm-hollow-coast-tidewater.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-05T16:37:44Z",
+      "playCount": 3
+    },
+    "lfm-the-ivory-hours-small-hours": {
+      "id": "lfm-the-ivory-hours-small-hours",
+      "name": "Small Hours",
+      "artist": "The Ivory Hours",
+      "imageURL": "https://example.invalid/art/lfm-the-ivory-hours-small-hours.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-04T23:29:16Z",
+      "playCount": 7
+    },
+    "lfm-junco-pass-winterlight": {
+      "id": "lfm-junco-pass-winterlight",
+      "name": "Winterlight",
+      "artist": "Junco Pass",
+      "imageURL": "https://example.invalid/art/lfm-junco-pass-winterlight.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "2026-09-04T19:52:30Z",
+      "playCount": 2
+    },
+    "lfm-saltmarsh-low-country": {
+      "id": "lfm-saltmarsh-low-country",
+      "name": "Low Country",
+      "artist": "Saltmarsh",
+      "imageURL": "https://example.invalid/art/lfm-saltmarsh-low-country.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 4
+    },
+    "lfm-bright-antenna-signal-fire": {
+      "id": "lfm-bright-antenna-signal-fire",
+      "name": "Signal Fire",
+      "artist": "Bright Antenna",
+      "imageURL": "https://example.invalid/art/lfm-bright-antenna-signal-fire.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 3
+    },
+    "lfm-the-cartographers-northing": {
+      "id": "lfm-the-cartographers-northing",
+      "name": "Northing",
+      "artist": "The Cartographers",
+      "imageURL": "https://example.invalid/art/lfm-the-cartographers-northing.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 2
+    },
+    "lfm-wren---sparrow-common-ground": {
+      "id": "lfm-wren---sparrow-common-ground",
+      "name": "Common Ground",
+      "artist": "Wren & Sparrow",
+      "imageURL": "https://example.invalid/art/lfm-wren---sparrow-common-ground.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 5
+    },
+    "lfm-glasshouse-choir-evensong": {
+      "id": "lfm-glasshouse-choir-evensong",
+      "name": "Evensong",
+      "artist": "Glasshouse Choir",
+      "imageURL": "https://example.invalid/art/lfm-glasshouse-choir-evensong.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 2
+    },
+    "lfm-motel-cassette-vacancy": {
+      "id": "lfm-motel-cassette-vacancy",
+      "name": "Vacancy",
+      "artist": "Motel Cassette",
+      "imageURL": "https://example.invalid/art/lfm-motel-cassette-vacancy.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 3
+    },
+    "lfm-the-orchard-line-windfall": {
+      "id": "lfm-the-orchard-line-windfall",
+      "name": "Windfall",
+      "artist": "The Orchard Line",
+      "imageURL": "https://example.invalid/art/lfm-the-orchard-line-windfall.jpg",
+      "firstSeen": "2026-09-01T12:00:00Z",
+      "lastPlayed": "1970-01-01T00:00:01Z",
+      "playCount": 1
+    },
+    "lfm-copperfield-green-thistledown": {
+      "id": "lfm-copperfield-green-thistledown",
+      "name": "Thistledown",
+      "artist": "Copperfield Green",
+      "imageURL": "https://example.invalid/art/lfm-copperfield-green-thistledown.jpg",
       "firstSeen": "2026-09-01T12:00:00Z",
       "lastPlayed": "1970-01-01T00:00:01Z",
       "playCount": 1
