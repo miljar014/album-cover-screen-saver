@@ -21,6 +21,7 @@ public static class Program
         StarfieldTests.Register(runner);
         SceneMathTests.Register(runner);
         DrumAndPlatformTests.Register(runner);
+        HalftoneTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);

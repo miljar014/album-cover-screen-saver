@@ -250,9 +250,12 @@ internal sealed class SubwayRenderer : IStyleRenderer, IDisposable
             Math.Max(10f, height * 0.021f), bold: true, SKColors.White);
         paint.TextAlign = SKTextAlign.Center;
 
+        // Measured from the frame rather than the poster. The frame is outset
+        // further than the specification's gap, so going off the poster puts the
+        // title on top of the moulding, where it is unreadable.
         Sign(
             canvas, title,
-            SKRect.Create(poster.Left, poster.Bottom + (height * 0.005f), poster.Width, height * 0.04f),
+            SKRect.Create(poster.Left, frame.Bottom + (height * 0.006f), poster.Width, height * 0.04f),
             paint);
     }
 
