@@ -147,6 +147,27 @@ public sealed class Featured
         ShownSince = phase;
     }
 
+    /// <summary>
+    /// How far through the album on show we are, 0 to 1.
+    /// </summary>
+    /// <param name="live">
+    /// The real position within the track, when something is playing. Null
+    /// otherwise, and then this falls back to how long the album has been up as
+    /// a fraction of the idle span.
+    /// </param>
+    /// <remarks>
+    /// A progress bar that stood still whenever the music stopped would read as
+    /// a frozen screen rather than as an idle one, so with nothing playing it
+    /// sweeps once per rotation and resets with the album.
+    /// </remarks>
+    public float Progress(double phase, double idleSpan, double? live)
+    {
+        if (live is { } position) return (float)Math.Clamp(position, 0.0, 1.0);
+
+        var span = Math.Max(MinimumIdleSpan, idleSpan);
+        return (float)Math.Clamp((phase - ShownSince) / span, 0.0, 1.0);
+    }
+
     /// <summary>How far through a change we are, 0 to 1, and 1 when not changing.</summary>
     public float FadeRaw(double phase) =>
         _changeStart < 0 ? 1f : Ease.Clamp((float)((phase - _changeStart) / ChangeDuration));

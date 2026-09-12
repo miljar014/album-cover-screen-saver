@@ -23,6 +23,7 @@ public static class Program
         DrumAndPlatformTests.Register(runner);
         HalftoneTests.Register(runner);
         CrtTests.Register(runner);
+        CdPlayerTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);

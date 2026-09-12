@@ -89,6 +89,9 @@ internal sealed class Scene : IDisposable
         // one after the other.
         _styles[CollageMode.Crt] =
             new CrtRenderer(data, picker, _halftones);
+
+        _styles[CollageMode.CdPlayer] =
+            new CdPlayerRenderer(data, picker, _palettes, _random, isPreview);
     }
 
     /// <summary>
