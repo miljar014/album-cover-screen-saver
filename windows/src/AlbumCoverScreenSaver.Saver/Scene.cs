@@ -56,13 +56,19 @@ internal sealed class Scene : IDisposable
 
         _styles[CollageMode.Gallery] =
             new GalleryRenderer(data, picker, _palettes, isPreview);
+
+        _styles[CollageMode.Ambient] =
+            new AmbientRenderer(data, picker, _palettes, isPreview);
+
+        _styles[CollageMode.CoverFlow] =
+            new CoverFlowRenderer(data, picker, _palettes, isPreview);
     }
 
     /// <summary>
     /// The style actually being drawn.
     /// </summary>
     /// <remarks>
-    /// Five of the nineteen are built. Anything else falls back to Mosaic Grid,
+    /// Seven of the nineteen are built. Anything else falls back to Mosaic Grid,
     /// which matters because settings.json is shared with the macOS build: a
     /// file naming Record Player has to leave the Windows saver drawing
     /// something rather than going black.

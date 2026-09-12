@@ -142,6 +142,77 @@ internal static class Drawing
         canvas.Restore();
     }
 
+    /// <summary>
+    /// A cover with the softer, heavier shadow the single-album styles use.
+    /// </summary>
+    /// <remarks>
+    /// A different profile from <see cref="DrawImage"/>: blur a tenth of the
+    /// width against six per cent, and a bigger drop. Both exist on purpose. A
+    /// cover in a grid is flat against the wall; a featured one is a record
+    /// propped up in front of you, and the shadow is what says so.
+    ///
+    /// The shadow strength is multiplied by the draw alpha, so a cover fading
+    /// out takes its shadow with it instead of leaving a dark patch behind.
+    /// </remarks>
+    public static void DrawCover(
+        SKCanvas canvas, SKBitmap? image, SKRect rect, float alpha, float radius, float shadowAlpha)
+    {
+        if (image is null || alpha <= 0.01f) return;
+
+        if (shadowAlpha > 0f)
+        {
+            var blur = rect.Width * 0.10f / 2f;
+            using var shadowPaint = new SKPaint
+            {
+                IsAntialias = true,
+                ImageFilter = SKImageFilter.CreateDropShadowOnly(
+                    0f, rect.Width * 0.035f, blur, blur,
+                    SKColors.Black.WithAlpha((byte)Math.Clamp(shadowAlpha * alpha * 255f, 0f, 255f))),
+            };
+            canvas.DrawRoundRect(rect, radius, radius, shadowPaint);
+        }
+
+        DrawImage(canvas, image, rect, alpha, radius, shadow: false);
+    }
+
+    /// <summary>A rectangle scaled about its own centre.</summary>
+    public static SKRect Scaled(SKRect rect, float factor) => SKRect.Create(
+        rect.MidX - (rect.Width * factor / 2f),
+        rect.MidY - (rect.Height * factor / 2f),
+        rect.Width * factor,
+        rect.Height * factor);
+
+    /// <summary>
+    /// The crossfade the single-album styles share: one cover replacing another.
+    /// </summary>
+    /// <remarks>
+    /// The outgoing cover drifts back and away while the incoming one rises
+    /// into place, and the seven per cent difference in scale between them is
+    /// the whole effect. Without it the two images simply dissolve into each
+    /// other, which reads as a glitch. With it, it reads as one object being
+    /// replaced by another.
+    /// </remarks>
+    public static void DrawFeaturedCover(
+        SKCanvas canvas, SKBitmap? incoming, SKBitmap? outgoing, SKRect rect,
+        float fadeRaw, float radius, float shadowAlpha)
+    {
+        if (fadeRaw >= 1f)
+        {
+            DrawCover(canvas, incoming, rect, 1f, radius, shadowAlpha);
+            return;
+        }
+
+        var eased = Ease.InOut(fadeRaw);
+
+        DrawCover(
+            canvas, outgoing, Scaled(rect, 1f + (0.07f * eased)),
+            1f - eased, radius, shadowAlpha * (1f - eased));
+
+        DrawCover(
+            canvas, incoming, Scaled(rect, 0.93f + (0.07f * eased)),
+            eased, radius, shadowAlpha * eased);
+    }
+
     /// <summary>Flat black over everything drawn so far.</summary>
     public static void Scrim(SKCanvas canvas, float width, float height, float alpha)
     {
