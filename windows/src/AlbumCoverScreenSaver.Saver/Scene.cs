@@ -68,13 +68,19 @@ internal sealed class Scene : IDisposable
 
         _styles[CollageMode.Polaroid] =
             new PolaroidRenderer(data, picker, _palettes, _random, isPreview);
+
+        _styles[CollageMode.Crate] =
+            new CrateRenderer(data, picker, _palettes, isPreview);
+
+        _styles[CollageMode.Vaporwave] =
+            new VaporwaveRenderer(data, picker, _palettes, isPreview);
     }
 
     /// <summary>
     /// The style actually being drawn.
     /// </summary>
     /// <remarks>
-    /// Nine of the nineteen are built. Anything else falls back to Mosaic Grid,
+    /// Eleven of the nineteen are built. Anything else falls back to Mosaic Grid,
     /// which matters because settings.json is shared with the macOS build: a
     /// file naming Record Player has to leave the Windows saver drawing
     /// something rather than going black.
