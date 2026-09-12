@@ -16,6 +16,7 @@ public static class Program
         StyleMathTests.Register(runner);
         PaletteTests.Register(runner);
         ScatterTests.Register(runner);
+        FeaturedTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);

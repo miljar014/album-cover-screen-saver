@@ -21,6 +21,7 @@ internal sealed class Scene : IDisposable
     private readonly Random _random;
     private readonly bool _isPreview;
     private readonly BlurStore _blur = new();
+    private readonly PaletteStore _palettes = new();
     private readonly Dictionary<CollageMode, IStyleRenderer> _styles = new();
 
     private CollageMode? _layoutMode;
@@ -52,13 +53,16 @@ internal sealed class Scene : IDisposable
 
         _styles[CollageMode.Drift] =
             new DriftRenderer(data, picker, _random, _blur, isPreview);
+
+        _styles[CollageMode.Gallery] =
+            new GalleryRenderer(data, picker, _palettes, isPreview);
     }
 
     /// <summary>
     /// The style actually being drawn.
     /// </summary>
     /// <remarks>
-    /// Four of the nineteen are built. Anything else falls back to Mosaic Grid,
+    /// Five of the nineteen are built. Anything else falls back to Mosaic Grid,
     /// which matters because settings.json is shared with the macOS build: a
     /// file naming Record Player has to leave the Windows saver drawing
     /// something rather than going black.
@@ -147,6 +151,7 @@ internal sealed class Scene : IDisposable
     public void Dispose()
     {
         _blur.Dispose();
+        _palettes.Purge();
         foreach (var style in _styles.Values)
         {
             if (style is IDisposable disposable) disposable.Dispose();
