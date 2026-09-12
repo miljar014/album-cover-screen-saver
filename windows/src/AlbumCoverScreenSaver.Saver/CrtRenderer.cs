@@ -43,6 +43,13 @@ internal sealed class CrtRenderer : IStyleRenderer, IDisposable
     private SKBitmap? _scanTile;
     private SKPaint? _big;
     private SKPaint? _small;
+
+    // Two thousand one hundred and sixteen circles, redrawn every frame for a
+    // picture that only changes when the album does. The fade multiplies every
+    // dot's brightness by the same amount, so the grid is rendered at full
+    // brightness and the whole image is blitted at the fade instead.
+    private readonly Layer _portrait = new();
+    private readonly SKPaint _blit = new() { IsAntialias = true, FilterQuality = SKFilterQuality.Medium };
     private float _builtFor;
     private float _builtHeight;
     private float _builtScale;
@@ -94,7 +101,7 @@ internal sealed class CrtRenderer : IStyleRenderer, IDisposable
         var side = CrtTerminal.PortraitSide(width, height);
         var portrait = SKRect.Create(width * 0.10f, (height * 0.5f) - (side / 2f), side, side);
 
-        DrawPortrait(canvas, portrait, index, _featured.Fade(phase));
+        DrawPortrait(canvas, portrait, index, _featured.Fade(phase), scale);
         DrawReadout(canvas, width, height, side, index, live, phase);
 
         Wash(canvas, width, height, _scanlines);
@@ -120,31 +127,53 @@ internal sealed class CrtRenderer : IStyleRenderer, IDisposable
     /// flip and Windows must not have one, and this is the second of the two
     /// call sites that have to agree about it.
     /// </remarks>
-    private void DrawPortrait(SKCanvas canvas, SKRect portrait, int index, float fade)
+    private void DrawPortrait(SKCanvas canvas, SKRect portrait, int index, float fade, float scale)
     {
-        var grid = _halftones.For(_data.Albums[index].Id, _data.ImageFor(index));
+        var albumId = _data.Albums[index].Id;
+
+        var grid = _halftones.For(albumId, _data.ImageFor(index));
         if (grid is null) return;
 
-        var cell = portrait.Width / Halftone.Grid;
+        var side = portrait.Width;
         var phosphor = Phosphor;
 
-        _fill.Shader = null;
+        var image = _portrait.Get(
+            side, side, scale, $"crt|{albumId}|{_data.Settings.CrtAmber}|{side:0.#}",
+            surface => PaintDots(surface, grid, side, phosphor));
+
+        if (image is null)
+        {
+            PaintDots(canvas, grid, side, phosphor, portrait.Left, portrait.Top);
+            return;
+        }
+
+        _blit.Color = SKColors.White.WithAlpha((byte)Math.Clamp(fade * 255f, 0f, 255f));
+        canvas.DrawImage(image, portrait, _blit);
+    }
+
+    private static void PaintDots(
+        SKCanvas canvas, float[] grid, float side, SKColor phosphor,
+        float originX = 0f, float originY = 0f)
+    {
+        var cell = side / Halftone.Grid;
+
+        using var paint = new SKPaint { IsAntialias = true };
 
         for (var row = 0; row < Halftone.Grid; row++)
         {
             for (var column = 0; column < Halftone.Grid; column++)
             {
-                var dot = CrtTerminal.DotFor(grid[(row * Halftone.Grid) + column], cell, fade);
+                var dot = CrtTerminal.DotFor(grid[(row * Halftone.Grid) + column], cell, 1f);
                 if (!dot.Lit) continue;
 
                 var (x, y) = Halftone.CellOrigin(row, column, cell, dot.Diameter);
 
-                _fill.Color = phosphor.WithAlpha((byte)Math.Clamp(dot.Alpha * 255f, 0f, 255f));
+                paint.Color = phosphor.WithAlpha((byte)Math.Clamp(dot.Alpha * 255f, 0f, 255f));
 
                 canvas.DrawCircle(
-                    portrait.Left + x + (dot.Diameter / 2f),
-                    portrait.Top + y + (dot.Diameter / 2f),
-                    dot.Diameter / 2f, _fill);
+                    originX + x + (dot.Diameter / 2f),
+                    originY + y + (dot.Diameter / 2f),
+                    dot.Diameter / 2f, paint);
             }
         }
     }
@@ -348,5 +377,7 @@ internal sealed class CrtRenderer : IStyleRenderer, IDisposable
     {
         Release();
         _fill.Dispose();
+        _blit.Dispose();
+        _portrait.Dispose();
     }
 }

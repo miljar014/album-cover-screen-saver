@@ -34,6 +34,14 @@ internal sealed class NewsstandRenderer : IStyleRenderer, IDisposable
 
     private readonly Featured _featured;
     private readonly SKPaint _fill = new() { IsAntialias = true };
+    private readonly SKPaint _blit = new() { IsAntialias = true, FilterQuality = SKFilterQuality.Medium };
+
+    // Nothing on this page moves. Between one album and the next it is the same
+    // picture, and it was being redrawn thirty times a second: ninety blotches
+    // of foxing, two thousand one hundred and sixteen halftone dots, and all the
+    // type. The page cuts rather than crossfades, so rebuilding it at the cut
+    // costs one frame nobody can see.
+    private readonly Layer _page = new();
 
     public NewsstandRenderer(
         SaverData data, AlbumPicker picker, PaletteStore palettes, HalftoneStore halftones)
@@ -62,6 +70,24 @@ internal sealed class NewsstandRenderer : IStyleRenderer, IDisposable
         if (albums.Count == 0) return;
 
         var index = Math.Clamp(_featured.Index, 0, albums.Count - 1);
+        var live = _data.LiveAlbumIndex == index;
+
+        var cached = _page.Get(
+            width, height, Layer.ScaleOf(canvas), $"page|{albums[index].Id}|{live}",
+            surface => PaintPage(surface, width, height, index));
+
+        if (cached is not null)
+        {
+            canvas.DrawImage(cached, SKRect.Create(0, 0, width, height), _blit);
+            return;
+        }
+
+        PaintPage(canvas, width, height, index);
+    }
+
+    private void PaintPage(SKCanvas canvas, float width, float height, int index)
+    {
+        var albums = _data.Albums;
         var palette = _palettes.For(albums[index].Id, _data.ImageFor(index));
         var (title, artist, sub) = FeaturedText.For(_data, index);
 
@@ -292,5 +318,10 @@ internal sealed class NewsstandRenderer : IStyleRenderer, IDisposable
         }
     }
 
-    public void Dispose() => _fill.Dispose();
+    public void Dispose()
+    {
+        _fill.Dispose();
+        _blit.Dispose();
+        _page.Dispose();
+    }
 }

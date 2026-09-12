@@ -40,6 +40,15 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
 
     private readonly SKColor[] _hues = new SKColor[CdPlayer.Arcs];
 
+    // The disc's face never changes. It only turns, so it is drawn once and
+    // blitted at an angle. Sixty four arcs stroked at nearly half a radius is
+    // tens of millions of antialiased pixels a frame on a large screen, and
+    // every one of those frames was producing an identical picture.
+    private readonly Layer _disc = new();
+    private readonly ShadowSprite _shadows = new();
+    private readonly SKPaint _sprite = new() { IsAntialias = true, FilterQuality = SKFilterQuality.Low };
+    private readonly SKPaint _blit = new() { IsAntialias = true, FilterQuality = SKFilterQuality.Medium };
+
     private List<Sleeve> _cases = [];
 
     // Resolved once per layout. Looking a typeface up by family name every frame
@@ -97,6 +106,10 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
         var previous = Math.Clamp(_featured.PreviousIndex, 0, albums.Count - 1);
         var palette = _palettes.For(albums[index].Id, _data.ImageFor(index));
 
+        // Taken before anything rotates the canvas, because a rotated matrix no
+        // longer reports the display's scaling in its vertical term.
+        var scale = Layer.ScaleOf(canvas);
+
         DrawRoom(canvas, width, height, palette);
         DrawCases(canvas, palette);
 
@@ -114,7 +127,7 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
         _fill.Color = new SKColor(13, 13, 13, 230);
         canvas.DrawCircle(cx, cy, CdPlayer.DiscWell(radius), _fill);
 
-        DrawDisc(canvas, cx, cy, radius, index, previous, phase);
+        DrawDisc(canvas, cx, cy, radius, index, previous, phase, scale);
 
         // Outside the rotation, so it is the rim of the disc and not a mark on
         // its surface going round with it.
@@ -158,16 +171,16 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
     {
         var corner = CdPlayer.BodyCorner(radius);
 
-        using (var shadow = SKImageFilter.CreateDropShadowOnly(
-                   0f, radius * 0.10f, radius * 0.30f, radius * 0.30f,
-                   SKColors.Black.WithAlpha(191)))
-        {
-            _fill.Shader = null;
-            _fill.Color = SKColors.Black;
-            _fill.ImageFilter = shadow;
-            canvas.DrawRoundRect(body, corner, corner, _fill);
-            _fill.ImageFilter = null;
-        }
+        // A stretched sprite, not a filter. The body is nearly the height of the
+        // screen and its shadow blurs by a third of a radius, so asking Skia for
+        // it every frame means blurring a four megapixel layer thirty times a
+        // second for a picture that never changes.
+        _sprite.Color = SKColors.White.WithAlpha(191);
+
+        canvas.DrawBitmap(
+            _shadows.Get(corner / body.Width, blurFraction: radius * 0.30f / body.Width),
+            ShadowSprite.Placement(body, dropFraction: radius * 0.10f / body.Width),
+            _sprite);
 
         // The gradient runs down and a little to the right, which is the
         // specification's minus seventy degrees converted out of y-up.
@@ -187,28 +200,41 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
     /// The disc itself, all of it inside one rotation.
     /// </summary>
     private void DrawDisc(
-        SKCanvas canvas, float cx, float cy, float radius, int index, int previous, double phase)
+        SKCanvas canvas, float cx, float cy, float radius,
+        int index, int previous, double phase, float scale)
     {
+        var side = radius * 2f;
+
+        // Silver and rainbow together, drawn once into their own image. The
+        // label goes on top because it changes with the album, and the rings at
+        // the middle are concentric so it makes no difference whether they turn.
+        var face = _disc.Get(side, side, scale, $"cd-face|{radius:0.#}", surface =>
+        {
+            using var silver = SKShader.CreateLinearGradient(
+                new SKPoint(radius - (radius * 0.5f), radius - (radius * 0.87f)),
+                new SKPoint(radius + (radius * 0.5f), radius + (radius * 0.87f)),
+                new[] { new SKColor(219, 219, 219), new SKColor(140, 140, 140) },
+                SKShaderTileMode.Clamp);
+
+            using var paint = new SKPaint { IsAntialias = true, Shader = silver };
+            surface.DrawCircle(radius, radius, radius, paint);
+
+            DrawDiffraction(surface, radius, radius, radius);
+        });
+
         canvas.Save();
         canvas.RotateRadians(CdPlayer.Spin(phase), cx, cy);
 
-        using (var silver = SKShader.CreateLinearGradient(
-                   new SKPoint(cx - (radius * 0.5f), cy - (radius * 0.87f)),
-                   new SKPoint(cx + (radius * 0.5f), cy + (radius * 0.87f)),
-                   new[] { new SKColor(219, 219, 219), new SKColor(140, 140, 140) },
-                   SKShaderTileMode.Clamp))
+        if (face is not null)
         {
-            _fill.Shader = silver;
-            _fill.Color = SKColors.White;
-            canvas.DrawCircle(cx, cy, radius, _fill);
-            _fill.Shader = null;
+            canvas.DrawImage(face, SKRect.Create(cx - radius, cy - radius, side, side), _blit);
         }
 
-        DrawDiffraction(canvas, cx, cy, radius);
         DrawLabel(canvas, cx, cy, radius, index, previous, phase);
-        DrawMiddle(canvas, cx, cy, radius);
 
         canvas.Restore();
+
+        DrawMiddle(canvas, cx, cy, radius);
     }
 
     /// <summary>
@@ -385,16 +411,14 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
             var half = sleeve.Side / 2f;
             var square = SKRect.Create(-half, -half, sleeve.Side, sleeve.Side);
 
-            using (var shadow = SKImageFilter.CreateDropShadowOnly(
-                       0f, sleeve.Side * 0.035f, sleeve.Side * 0.13f, sleeve.Side * 0.13f,
-                       SKColors.Black.WithAlpha(153)))
-            {
-                _fill.Shader = null;
-                _fill.Color = SKColors.Black;
-                _fill.ImageFilter = shadow;
-                canvas.DrawRect(square, _fill);
-                _fill.ImageFilter = null;
-            }
+            // Nine of these a frame, each a blurred offscreen layer, was the
+            // other half of why this style ran at three frames a second.
+            _sprite.Color = SKColors.White.WithAlpha(153);
+
+            canvas.DrawBitmap(
+                _shadows.Get(0f, blurFraction: 0.13f),
+                ShadowSprite.Placement(square, dropFraction: 0.035f),
+                _sprite);
 
             // The black tray you can see through the plastic.
             _fill.Color = new SKColor(26, 26, 26, 242);
@@ -503,5 +527,9 @@ internal sealed class CdPlayerRenderer : IStyleRenderer, IDisposable
         _fill.Dispose();
         _arc.Dispose();
         _lcdFont?.Dispose();
+        _disc.Dispose();
+        _shadows.Dispose();
+        _sprite.Dispose();
+        _blit.Dispose();
     }
 }

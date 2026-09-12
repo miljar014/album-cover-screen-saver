@@ -31,6 +31,13 @@ internal sealed class Scene : IDisposable
     private int _layoutGeneration = -1;
     private readonly HashSet<CollageMode> _reportedMissing = [];
 
+    private double _phase;
+
+    // Starts a long way in the past, so with nothing playing the saver opens
+    // straight into Record Player's fallback style rather than showing an idle
+    // turntable for twenty seconds first.
+    private double _lastLiveAt = -1000;
+
     public Scene(SaverData data, bool isPreview, int seed)
     {
         _data = data;
@@ -92,25 +99,40 @@ internal sealed class Scene : IDisposable
 
         _styles[CollageMode.CdPlayer] =
             new CdPlayerRenderer(data, picker, _palettes, _random, isPreview);
+
+        _styles[CollageMode.Jukebox] =
+            new JukeboxRenderer(data, picker, _palettes, _random, isPreview);
+
+        _styles[CollageMode.Cassette] =
+            new CassetteRenderer(data, picker, _palettes, isPreview);
+
+        _styles[CollageMode.Vinyl] =
+            new VinylRenderer(data, picker, _palettes, _blur, _random, isPreview);
     }
 
     /// <summary>
     /// The style actually being drawn.
     /// </summary>
     /// <remarks>
-    /// Fourteen of the nineteen are built, which is every scene style. Anything else falls back to Mosaic Grid,
-    /// which matters because settings.json is shared with the macOS build: a
-    /// file naming Record Player has to leave the Windows saver drawing
-    /// something rather than going black.
-    ///
-    /// Record Player's own fallback rule and its twenty second grace period
-    /// (doc 01 section 1.5) belong here too, once that style exists.
+    /// <para>
+    /// All nineteen are built. Anything unrecognised still falls back to Mosaic
+    /// Grid, which matters because settings.json is shared with the macOS
+    /// build: a file naming a style this version has never heard of has to
+    /// leave the saver drawing something rather than going black.
+    /// </para>
+    /// <para>
+    /// Record Player's own rule sits on top of that. A turntable with nothing on
+    /// it is a dead screen, so after twenty seconds without music the screen is
+    /// handed to whichever style the user chose for it.
+    /// </para>
     /// </remarks>
     private CollageMode ActiveMode
     {
         get
         {
-            var wanted = _data.Settings.Mode;
+            var wanted = Turntable.ActiveMode(
+                _data.Settings.Mode, _phase, _lastLiveAt, _data.Settings.VinylFallbackMode);
+
             if (_styles.ContainsKey(wanted)) return wanted;
 
             if (_reportedMissing.Add(wanted))
@@ -129,6 +151,12 @@ internal sealed class Scene : IDisposable
     /// </summary>
     public void Render(SKCanvas canvas, float width, float height, double phase, string? diagnostic)
     {
+        _phase = phase;
+
+        // Refreshed every frame the now-playing signal is live, which is what
+        // the grace period is measured from.
+        if (_data.NowPlaying.IsLive) _lastLiveAt = phase;
+
         EnsureLayout(width, height);
 
         var style = _styles[ActiveMode];

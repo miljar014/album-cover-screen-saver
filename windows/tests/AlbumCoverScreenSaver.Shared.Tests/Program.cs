@@ -24,6 +24,7 @@ public static class Program
         HalftoneTests.Register(runner);
         CrtTests.Register(runner);
         CdPlayerTests.Register(runner);
+        DeviceTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);

@@ -47,21 +47,31 @@ internal sealed class ShadowSprite : IDisposable
 
     private readonly Dictionary<int, SKBitmap> _byRadius = new();
 
-    /// <summary>The sprite for a given corner radius, as a fraction of the side.</summary>
-    public SKBitmap Get(float cornerFraction)
+    /// <summary>
+    /// The sprite for a given corner radius and blur, both as fractions of the
+    /// side.
+    /// </summary>
+    /// <remarks>
+    /// The blur is a parameter because the device styles ask for much softer
+    /// shadows than the covers do: a CD player's body wants a blur of nearly a
+    /// ninth of its own width. It is still one bitmap per distinct pair, made
+    /// once.
+    /// </remarks>
+    public SKBitmap Get(float cornerFraction, float blurFraction = BlurFraction)
     {
         // Keyed to a thousandth, so a style asking for 3% every frame gets the
         // same bitmap rather than a new one each time.
-        var key = (int)Math.Round(cornerFraction * 1000f);
+        var key = ((int)Math.Round(cornerFraction * 1000f) * 10_000)
+                  + (int)Math.Round(blurFraction * 1000f);
 
         if (_byRadius.TryGetValue(key, out var cached)) return cached;
 
-        var made = Render(cornerFraction);
+        var made = Render(cornerFraction, blurFraction);
         _byRadius[key] = made;
         return made;
     }
 
-    private static SKBitmap Render(float cornerFraction)
+    private static SKBitmap Render(float cornerFraction, float blurFraction)
     {
         var bitmap = new SKBitmap(new SKImageInfo(Side, Side, SKColorType.Bgra8888, SKAlphaType.Premul));
 
@@ -70,7 +80,7 @@ internal sealed class ShadowSprite : IDisposable
 
         // CoreGraphics states a shadow blur as a diameter, so the standard
         // deviation Skia wants is half of it.
-        var sigma = Core * BlurFraction / 2f;
+        var sigma = Core * blurFraction / 2f;
 
         using var blur = SKImageFilter.CreateBlur(sigma, sigma);
         using var paint = new SKPaint
@@ -93,10 +103,10 @@ internal sealed class ShadowSprite : IDisposable
     /// The padding scales with the cover, so the blur stays the same fraction of
     /// the width at every size, which is what the specification asks for.
     /// </remarks>
-    public static SKRect Placement(SKRect cover)
+    public static SKRect Placement(SKRect cover, float dropFraction = DropFraction)
     {
         var grow = Pad * (cover.Width / Core);
-        var drop = cover.Width * DropFraction;
+        var drop = cover.Width * dropFraction;
 
         return SKRect.Create(
             cover.Left - grow,
