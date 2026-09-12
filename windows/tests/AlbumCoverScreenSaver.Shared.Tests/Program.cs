@@ -18,6 +18,7 @@ public static class Program
         ScatterTests.Register(runner);
         FeaturedTests.Register(runner);
         CoverFlowTests.Register(runner);
+        StarfieldTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);
