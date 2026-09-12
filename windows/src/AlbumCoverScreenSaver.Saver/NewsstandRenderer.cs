@@ -106,12 +106,15 @@ internal sealed class NewsstandRenderer : IStyleRenderer, IDisposable
         Rule(canvas, margin, top, columnWidth, 1f);
         top += height * 0.028f;
 
-        var photoSide = columnWidth * 0.46f;
+        // The photograph takes the width the design asks for, or whatever the
+        // page can still afford by the time it gets here, whichever is less.
+        var pageBottom = height * NewsstandPage.BottomFraction;
+        var photoSide = NewsstandPage.PhotoSide(columnWidth, height, top);
         var photo = SKRect.Create(margin, top, photoSide, photoSide);
 
         DrawPhotograph(canvas, photo, index);
         DrawCaption(canvas, photo, height, string.IsNullOrEmpty(sub) ? albums[index].Name : sub);
-        DrawColumns(canvas, width, height, margin, columnWidth, photo, top);
+        DrawColumns(canvas, width, height, margin, columnWidth, photo, top, pageBottom);
 
         // The one hint of the album's own colour on the whole page.
         _fill.Shader = null;
@@ -252,7 +255,7 @@ internal sealed class NewsstandRenderer : IStyleRenderer, IDisposable
     /// </remarks>
     private void DrawColumns(
         SKCanvas canvas, float width, float height, float margin, float columnWidth,
-        SKRect photo, float top)
+        SKRect photo, float top, float pageBottom)
     {
         var left = photo.Right + (columnWidth * 0.05f);
         var available = width - margin - left;
@@ -261,7 +264,11 @@ internal sealed class NewsstandRenderer : IStyleRenderer, IDisposable
         var gutter = available * 0.06f;
         var each = (available - gutter) / 2f;
         var thickness = Math.Max(1f, height * 0.0035f);
-        var stop = photo.Bottom + (height * 0.02f);
+
+        // The columns run to the foot of the page rather than to the bottom of
+        // the photograph. Tied to the photograph they would leave a blank
+        // quarter of the page whenever the photograph had to be cut down.
+        var stop = pageBottom;
 
         _fill.Shader = null;
 

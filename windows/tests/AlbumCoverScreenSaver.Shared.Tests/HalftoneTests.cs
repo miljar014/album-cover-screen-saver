@@ -7,6 +7,108 @@ public static class HalftoneTests
 {
     public static void Register(TestRunner runner)
     {
+        Dots(runner);
+        Page(runner);
+    }
+
+    private static void Page(TestRunner runner)
+    {
+        runner.Group("Newsstand: fitting the page");
+
+        runner.Add("a tall page gets the photograph the design asks for", () =>
+        {
+            // A page taller than it is wide has room to spare, and then the
+            // width the specification asks for is exactly what it gets. This is
+            // the case where the rule must keep out of the way.
+            const float columnWidth = 1080f * 0.88f;
+
+            Check.Close(
+                columnWidth * NewsstandPage.WantedFraction,
+                NewsstandPage.PhotoSide(columnWidth, 1920f, 1920f * 0.33f),
+                0.01, "the full width");
+        });
+
+        runner.Add("a wide page gets exactly the room it has left, and no more", () =>
+        {
+            // The specification sizes the photograph from the width of the page
+            // alone: colW * 0.46. On any ordinary screen that is taller than
+            // what is left below the headline, so the Mac's own page runs off
+            // the bottom too. This is a deliberate departure from it.
+            const float height = 1080f;
+            const float columnWidth = 1920f * 0.88f;
+            var top = height * 0.33f;
+
+            var wanted = columnWidth * NewsstandPage.WantedFraction;
+            var got = NewsstandPage.PhotoSide(columnWidth, height, top);
+
+            Check.True(got < wanted, "sixteen by nine has room for the full width, which it should not");
+
+            Check.Close(
+                (height * NewsstandPage.BottomFraction) - top - (height * NewsstandPage.CaptionFraction),
+                got, 0.01, "it takes everything that is left");
+        });
+
+        runner.Add("a photograph never runs past the foot of the page", () =>
+        {
+            // The case the recording caught: a tall page and a headline that
+            // pushed the photograph a long way down. It used to be sized from
+            // the width alone and ran off the bottom, taking its caption and
+            // the colour bar with it.
+            foreach (var height in new[] { 720f, 1080f, 1290f, 2160f })
+            {
+                foreach (var ratio in new[] { 1.33f, 1.6f, 1.78f, 2.39f, 3.55f })
+                {
+                    var columnWidth = height * ratio * 0.88f;
+
+                    foreach (var startFraction in new[] { 0.30f, 0.38f, 0.45f, 0.52f })
+                    {
+                        var top = height * startFraction;
+                        var side = NewsstandPage.PhotoSide(columnWidth, height, top);
+                        var bottom = top + side;
+
+                        // The floor is allowed to win on an absurdly wide page,
+                        // and then the photograph may reach past the foot. That
+                        // is the one case the rule deliberately gives up on.
+                        if (side <= columnWidth * NewsstandPage.FloorFraction + 0.01f) continue;
+
+                        Check.True(
+                            bottom <= height * NewsstandPage.BottomFraction,
+                            $"{ratio:0.00} at {height:0} starting at {startFraction:0.00} "
+                            + $"ends at {bottom / height:0.000} of the height");
+                    }
+                }
+            }
+        });
+
+        runner.Add("the caption always has somewhere to go", () =>
+        {
+            const float height = 1080f;
+            const float columnWidth = 1920f * 0.88f;
+
+            var top = height * 0.44f;
+            var bottom = top + NewsstandPage.PhotoSide(columnWidth, height, top);
+
+            Check.True(
+                height - bottom >= height * NewsstandPage.CaptionFraction,
+                "the caption is squeezed off the page");
+        });
+
+        runner.Add("the photograph never shrinks to a stamp", () =>
+        {
+            // A page with no room at all still prints something recognisable.
+            // A tiny photograph reads as a mistake; one slightly too big reads
+            // as a crowded front page, which is what a front page is.
+            const float columnWidth = 1000f;
+
+            Check.Close(
+                columnWidth * NewsstandPage.FloorFraction,
+                NewsstandPage.PhotoSide(columnWidth, 1080f, 1080f * 0.90f),
+                0.01, "the floor holds");
+        });
+    }
+
+    private static void Dots(TestRunner runner)
+    {
         runner.Group("Newsstand: the halftone");
 
         runner.Add("ink is the inverse of light", () =>
