@@ -27,8 +27,6 @@ public static class Starfield
     /// </summary>
     public const float OrbitTilt = 0.34f;
 
-    private static double Fraction(double value) => value - Math.Floor(value);
-
     /// <summary>
     /// Star <paramref name="index"/>, as fractions of the screen.
     /// </summary>
@@ -42,9 +40,9 @@ public static class Starfield
     /// </remarks>
     public static Star At(int index)
     {
-        var x = Fraction(Math.Sin(index * 12.9898) * 43758.5453);
-        var y = Fraction(Math.Sin(index * 78.233) * 12345.6789);
-        var depth = Fraction(Math.Sin(index * 39.77) * 5647.31);
+        var x = Noise.Fraction(Math.Sin(index * 12.9898) * 43758.5453);
+        var y = Noise.Fraction(Math.Sin(index * 78.233) * 12345.6789);
+        var depth = Noise.Fraction(Math.Sin(index * 39.77) * 5647.31);
 
         return new Star(x, y, depth);
     }

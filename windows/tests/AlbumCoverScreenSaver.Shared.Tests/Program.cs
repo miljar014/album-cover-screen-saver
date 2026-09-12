@@ -20,6 +20,7 @@ public static class Program
         CoverFlowTests.Register(runner);
         StarfieldTests.Register(runner);
         SceneMathTests.Register(runner);
+        DrumAndPlatformTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);
