@@ -21,13 +21,15 @@ internal sealed class SaverWindow : IDisposable
 
     public SaverWindow(
         nint handle, bool isPreview, int ordinal, int total, DisplayInfo? display,
-        SaverData data, int seed)
+        SaverData data, int seed,
+        IReadOnlyList<(int X, int Y, int Width, int Height)>? arrangement = null)
     {
         Handle = handle;
         IsPreview = isPreview;
         Ordinal = ordinal;
         Total = total;
         Display = display;
+        Arrangement = arrangement ?? [];
 
         // Its own scene, and therefore its own tiles and its own random source.
         // Sharing one would give every screen an identical wall.
@@ -41,6 +43,12 @@ internal sealed class SaverWindow : IDisposable
     public DisplayInfo? Display { get; }
     public Scene Scene { get; }
 
+    /// <summary>
+    /// Every screen's rectangle, so this one can work out which part of a
+    /// spread composition it is looking at.
+    /// </summary>
+    public IReadOnlyList<(int X, int Y, int Width, int Height)> Arrangement { get; }
+
     public void Render(double phase)
     {
         if (!EnsureSurface()) return;
@@ -51,7 +59,32 @@ internal sealed class SaverWindow : IDisposable
             // it is in points. See the note on DpiScale.
             var scale = DpiScale;
             canvas.Scale(scale);
-            Scene.Render(canvas, _width / scale, _height / scale, phase, IsPreview ? null : Describe());
+
+            // Where this screen sits on the shared composition, when there is
+            // one. Ordinary runs get a canvas the size of this screen and no
+            // offset, which is what every style has always been handed.
+            var span = Scene.CanvasFor(
+                Display is null
+                    ? (0, 0, _width, _height)
+                    : (Display.Bounds.Left, Display.Bounds.Top, _width, _height),
+                Arrangement, scale);
+
+            canvas.Save();
+            if (!span.IsSingle) canvas.Translate(-span.OffsetX, -span.OffsetY);
+
+            Scene.Render(canvas, span.Width, span.Height, phase, diagnostic: null);
+
+            canvas.Restore();
+
+            // Drawn after the composition and outside its translation, because
+            // the line belongs to this screen rather than to the shared picture.
+            // Left inside it, it lands at the top left of the whole desk and
+            // only one screen ever shows it.
+            if (!IsPreview)
+            {
+                Drawing.DrawDiagnostic(canvas, Describe(), _width / scale, _height / scale);
+            }
+
             canvas.Flush();
         }
 

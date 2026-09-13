@@ -8,25 +8,87 @@ public enum MultiMonitorMode
 
     /// <summary>Every screen draws from one shared sequence on one shared clock.</summary>
     Linked,
+
+    /// <summary>
+    /// One composition spread across every screen, each drawing its own part.
+    /// </summary>
+    /// <remarks>
+    /// Added after the fact, at Jared's request. The original design ruled out a
+    /// window spanning the screens, for three good reasons that all turn out to
+    /// be about the <em>window</em> rather than about the picture. See
+    /// <see cref="SpanLayout"/>: there is still one window per screen, each at
+    /// its own scaling and refresh rate, and each is simply told it is looking
+    /// at part of something larger.
+    /// </remarks>
+    Span,
 }
 
 public static class MultiMonitorModes
 {
-    public static string Id(this MultiMonitorMode mode) =>
-        mode == MultiMonitorMode.Linked ? "linked" : "separate";
+    public static string Id(this MultiMonitorMode mode) => mode switch
+    {
+        MultiMonitorMode.Linked => "linked",
+        MultiMonitorMode.Span => "span",
+        _ => "separate",
+    };
 
     /// <summary>
-    /// Label for the settings window. Never "Span" or "Stretch": Windows uses
-    /// both for wallpaper that is cut across the bezels, and this deliberately
-    /// does not do that.
+    /// Label for the settings window.
     /// </summary>
-    public static string Title(this MultiMonitorMode mode) =>
-        mode == MultiMonitorMode.Linked ? "Screens change together" : "Each screen independent";
+    /// <remarks>
+    /// <b>"Screens change together" is never called Span or Stretch.</b> Windows
+    /// uses both words for wallpaper cut across the bezels, and that mode
+    /// deliberately does not do that: every screen shows a complete picture. The
+    /// mode that genuinely does spread one picture across the screens is the one
+    /// allowed to say so.
+    /// </remarks>
+    public static string Title(this MultiMonitorMode mode) => mode switch
+    {
+        MultiMonitorMode.Linked => "Screens change together",
+        MultiMonitorMode.Span => "One picture across all screens",
+        _ => "Each screen independent",
+    };
 
-    public static MultiMonitorMode ParseOr(string? id, MultiMonitorMode fallback) =>
-        string.Equals(id, "linked", StringComparison.OrdinalIgnoreCase) ? MultiMonitorMode.Linked
-        : string.Equals(id, "separate", StringComparison.OrdinalIgnoreCase) ? MultiMonitorMode.Separate
-        : fallback;
+    public static string Blurb(this MultiMonitorMode mode) => mode switch
+    {
+        MultiMonitorMode.Linked =>
+            "Each screen shows a complete picture, and they change at the same time "
+            + "using the same albums. Nothing is cut across a bezel.",
+
+        MultiMonitorMode.Span =>
+            "One composition spread over the whole desk, laid out to match where your "
+            + "screens actually are. Only for the styles that are fields of covers; "
+            + "the others centre on one subject and would put a bezel through it.",
+
+        _ =>
+            "Each screen picks its own albums on its own clock. Two screens running the "
+            + "same style show different covers arriving at different moments.",
+    };
+
+    /// <summary>Every mode, in the order the settings window should offer them.</summary>
+    public static IReadOnlyList<MultiMonitorMode> All { get; } =
+        [MultiMonitorMode.Separate, MultiMonitorMode.Linked, MultiMonitorMode.Span];
+
+    /// <summary>
+    /// Reads a stored value, falling back rather than failing.
+    /// </summary>
+    /// <remarks>
+    /// A settings file naming a mode this build has never heard of has to leave
+    /// the screens drawing something. Falling back to separate is also what an
+    /// older build does when it reads "span", which is the right answer: it
+    /// cannot spread a picture it has no code for.
+    /// </remarks>
+    public static MultiMonitorMode ParseOr(string? id, MultiMonitorMode fallback)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return fallback;
+
+        foreach (var mode in All)
+        {
+            if (string.Equals(mode.Id(), id.Trim(), StringComparison.OrdinalIgnoreCase)) return mode;
+        }
+
+        return fallback;
+    }
 }
 
 /// <summary>

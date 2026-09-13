@@ -33,6 +33,26 @@ internal sealed class Scene : IDisposable
 
     private double _phase;
 
+    /// <summary>
+    /// Which display's settings this scene obeys, or null in preview.
+    /// </summary>
+    /// <remarks>
+    /// Set once the window knows which screen it is on. Null means "follow the
+    /// main style", which is also what an unrecognised display gets: a screen
+    /// whose key is not in the settings must never end up showing nothing.
+    /// </remarks>
+    public string? DisplayKey
+    {
+        get => _displayKey;
+        set => _displayKey = value;
+    }
+
+    private string? _displayKey;
+
+    /// <summary>True when this screen was deliberately turned off.</summary>
+    private bool IsOff =>
+        !_isPreview && _displayKey is not null && _data.Settings.ForDisplay(_displayKey).IsOff;
+
     // Starts a long way in the past, so with nothing playing the saver opens
     // straight into Record Player's fallback style rather than showing an idle
     // turntable for twenty seconds first.
@@ -130,8 +150,16 @@ internal sealed class Scene : IDisposable
     {
         get
         {
+            // What this screen was told to show, which is the main style unless
+            // it was given one of its own. An unrecognised display reads as
+            // inherit, so a screen whose key is not in the settings draws the
+            // main style rather than nothing.
+            var chosen = _displayKey is null
+                ? _data.Settings.Mode
+                : _data.Settings.ModeForDisplay(_displayKey) ?? _data.Settings.Mode;
+
             var wanted = Turntable.ActiveMode(
-                _data.Settings.Mode, _phase, _lastLiveAt, _data.Settings.VinylFallbackMode);
+                chosen, _phase, _lastLiveAt, _data.Settings.VinylFallbackMode);
 
             if (_styles.ContainsKey(wanted)) return wanted;
 
@@ -142,6 +170,41 @@ internal sealed class Scene : IDisposable
 
             return CollageMode.Mosaic;
         }
+    }
+
+    /// <summary>
+    /// What this screen is drawing: itself, or its part of a shared composition.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Spreading happens only when the settings ask for it, there is more than
+    /// one screen, this screen follows the main style rather than having one of
+    /// its own, and that style is a field of covers rather than something with a
+    /// single subject in the middle. See <see cref="SpanLayout"/>.
+    /// </para>
+    /// <para>
+    /// Note what is <em>not</em> here: no second window, no change to any
+    /// renderer. A style is handed a larger surface and the canvas is
+    /// translated, and it goes on drawing exactly as it did.
+    /// </para>
+    /// </remarks>
+    public SpanCanvas CanvasFor(
+        (int X, int Y, int Width, int Height) screen,
+        IReadOnlyList<(int X, int Y, int Width, int Height)> arrangement,
+        float scale)
+    {
+        if (scale <= 0f) scale = 1f;
+
+        var own = SpanCanvas.Single(screen.Width / scale, screen.Height / scale);
+
+        if (_isPreview) return own;
+
+        var followsMain = _displayKey is null || _data.Settings.ForDisplay(_displayKey).IsInherit;
+
+        return SpanLayout.ShouldSpan(
+            _data.Settings.MultiMonitor, ActiveMode, arrangement?.Count ?? 0, followsMain)
+            ? SpanLayout.For(screen, arrangement!, scale)
+            : own;
     }
 
     /// <summary>
@@ -156,6 +219,16 @@ internal sealed class Scene : IDisposable
         // Refreshed every frame the now-playing signal is live, which is what
         // the grace period is measured from.
         if (_data.NowPlaying.IsLive) _lastLiveAt = phase;
+
+        // Off means black, not absent. The window is still created and still
+        // covers the screen, because a screen saver that leaves a display
+        // uncovered leaves the desktop showing on it, and with a logon required
+        // on resume an uncovered screen is a hole in the lock.
+        if (IsOff)
+        {
+            canvas.Clear(SKColors.Black);
+            return;
+        }
 
         EnsureLayout(width, height);
 

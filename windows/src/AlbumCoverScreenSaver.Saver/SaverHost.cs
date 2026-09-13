@@ -141,6 +141,15 @@ internal static class SaverHost
             return false;
         }
 
+        // Every screen's rectangle, so a window spreading a composition knows
+        // which part of it to draw, and the keys their settings are filed under.
+        var arrangement = displays
+            .Select(d => (d.Bounds.Left, d.Bounds.Top, d.Width, d.Height))
+            .ToArray();
+
+        var cards = DisplayScan.Connected();
+        if (cards.Count > 0) Log.Write($"{cards.Count} display(s) named by Windows");
+
         for (var i = 0; i < displays.Count; i++)
         {
             var display = displays[i];
@@ -162,8 +171,11 @@ internal static class SaverHost
             // style do not build the same wall.
             var seed = Environment.TickCount + (i * 7919);
 
-            Windows[handle] = new SaverWindow(
-                handle, isPreview: false, i + 1, displays.Count, display, _data!, seed);
+            var window = new SaverWindow(
+                handle, isPreview: false, i + 1, displays.Count, display, _data!, seed, arrangement);
+
+            window.Scene.DisplayKey = KeyFor(display, cards, i);
+            Windows[handle] = window;
 
             Native.ShowWindow(handle, Native.SW_SHOW);
             Native.UpdateWindow(handle);
@@ -175,6 +187,41 @@ internal static class SaverHost
         // than going to whatever was in front before.
         Native.SetForegroundWindow(Windows.Keys.First());
         return true;
+    }
+
+    /// <summary>
+    /// Which settings entry belongs to this monitor.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Matched on the rectangle, because the two ways Windows lists displays
+    /// come back in different orders and nothing in either is a handle to the
+    /// other. The rectangle is the one thing both report and it is unique: two
+    /// screens cannot occupy the same place on the desk.
+    /// </para>
+    /// <para>
+    /// Null when no match is found, which reads as "follow the main style". A
+    /// screen whose key could not be worked out must draw something rather than
+    /// nothing.
+    /// </para>
+    /// </remarks>
+    private static string? KeyFor(DisplayInfo display, IReadOnlyList<DisplayCard> cards, int index)
+    {
+        foreach (var card in cards)
+        {
+            if (card.Rect is not { Length: 4 }) continue;
+
+            if (card.Rect[0] == display.Bounds.Left &&
+                card.Rect[1] == display.Bounds.Top &&
+                card.Rect[2] == display.Width &&
+                card.Rect[3] == display.Height)
+            {
+                return card.Key;
+            }
+        }
+
+        Log.Write($"no settings key matched {display}; it will follow the main style");
+        return null;
     }
 
     private static int Loop()

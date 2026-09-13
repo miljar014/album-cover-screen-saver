@@ -28,6 +28,8 @@ public static class Program
         LastFmTests.Register(runner);
         LastFmSyncTests.Register(runner);
         MusicSourceTests.Register(runner);
+        DisplayMapTests.Register(runner);
+        SpanTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);

@@ -71,6 +71,16 @@ internal sealed class SettingsForm : Form
     private readonly Note _sourceBlurb;
     private readonly Note _accountStatus;
 
+    private readonly RadioButton _independent = new();
+    private readonly RadioButton _together = new();
+    private readonly RadioButton _spanned = new();
+    private readonly ArrangementMap _map = new();
+    private readonly ComboBox _displayMode = new();
+    private readonly Note _screensNote;
+
+    private List<DisplayCard> _cards = [];
+    private string? _selectedDisplay;
+
     private readonly List<Action> _refreshers = [];
     private readonly Dictionary<string, Control> _byKey = new(StringComparer.Ordinal);
 
@@ -127,6 +137,7 @@ internal sealed class SettingsForm : Form
         _saverStatus = new Note("") { Margin = new Padding(0, 0, 0, 12) };
         _sourceBlurb = new Note("") { IndentTo = _metrics, Margin = new Padding(0, 0, 0, 10) };
         _accountStatus = new Note("") { IndentTo = _metrics, Margin = new Padding(0, 0, 0, 12) };
+        _screensNote = new Note("") { Margin = new Padding(0, 0, 0, 12) };
 
         Build();
     }
@@ -149,7 +160,8 @@ internal sealed class SettingsForm : Form
             .Select(control => control.Label)
             .Append("Start after")
             .Append("Where music comes from")
-            .Append("Last.fm username");
+            .Append("Last.fm username")
+            .Append("This screen shows");
 
         _metrics.Label = labels.Select(Width).DefaultIfEmpty(120).Max() + 6;
 
@@ -246,6 +258,8 @@ internal sealed class SettingsForm : Form
             _shared,
             _styleHeader,
             _styleBody,
+            Header("Screens"),
+            ScreensSection(),
             Header("Screen Saver"),
             _saverStatus,
             TimeoutRow(),
@@ -260,6 +274,7 @@ internal sealed class SettingsForm : Form
         RebuildStyleOptions();
         RefreshSaverStatus();
         RefreshMusicSection();
+        RefreshScreens();
     }
 
     /// <summary>
@@ -446,6 +461,183 @@ internal sealed class SettingsForm : Form
                 : TrayConfig.LastFmUser.Length == 0
                     ? "Type your Last.fm username, then press Check."
                     : $"Set to {TrayConfig.LastFmUser}.";
+    }
+
+    /// <summary>
+    /// The Screens section: how the screens relate, and what each one shows.
+    /// </summary>
+    /// <remarks>
+    /// <b>The specification hides this entirely when there is one display</b>,
+    /// on the grounds that most people have one screen and should never see any
+    /// of it. It is shown here regardless, with a line saying why there is
+    /// nothing to arrange, because Jared asked to be able to look at it and the
+    /// build machine has one display. Hiding it again is one condition on the
+    /// visibility below, if that turns out to be the better answer once it has
+    /// been seen on a real two-monitor machine.
+    /// </remarks>
+    private Control ScreensSection()
+    {
+        var body = new Panel { Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+
+        _independent.Text = MultiMonitorMode.Separate.Title();
+        _independent.AutoSize = true;
+        _together.Text = MultiMonitorMode.Linked.Title();
+        _together.AutoSize = true;
+
+        _spanned.Text = MultiMonitorMode.Span.Title();
+        _spanned.AutoSize = true;
+
+        Tips.SetToolTip(_independent, MultiMonitorMode.Separate.Blurb());
+        Tips.SetToolTip(_together, MultiMonitorMode.Linked.Blurb());
+        Tips.SetToolTip(_spanned, MultiMonitorMode.Span.Blurb());
+
+        _independent.CheckedChanged += (_, _) =>
+        {
+            if (_loading || !_independent.Checked) return;
+            _settings.MultiMonitor = MultiMonitorMode.Separate;
+            Save();
+        };
+
+        _together.CheckedChanged += (_, _) =>
+        {
+            if (_loading || !_together.Checked) return;
+            _settings.MultiMonitor = MultiMonitorMode.Linked;
+            Save();
+            RefreshScreens();
+        };
+
+        _spanned.CheckedChanged += (_, _) =>
+        {
+            if (_loading || !_spanned.Checked) return;
+            _settings.MultiMonitor = MultiMonitorMode.Span;
+            Save();
+            RefreshScreens();
+        };
+
+        var relationship = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            WrapContents = true,
+            Margin = new Padding(0, 0, 0, 6),
+        };
+        relationship.Controls.Add(_independent);
+        relationship.Controls.Add(_together);
+        relationship.Controls.Add(_spanned);
+
+        _map.Picked += key =>
+        {
+            _selectedDisplay = key;
+            RefreshScreens();
+        };
+
+        _displayMode.DropDownStyle = ComboBoxStyle.DropDownList;
+        _displayMode.Height = _displayMode.PreferredHeight;
+        foreach (var (_, title) in DisplayMap.Choices()) _displayMode.Items.Add(title);
+
+        _displayMode.SelectedIndexChanged += (_, _) =>
+        {
+            if (_loading || _selectedDisplay is null || _displayMode.SelectedIndex < 0) return;
+
+            var chosen = DisplayMap.Choices()[_displayMode.SelectedIndex].Id;
+            var card = _cards.FirstOrDefault(c => c.Key == _selectedDisplay);
+
+            if (!_settings.Displays.TryGetValue(_selectedDisplay, out var setting))
+            {
+                setting = new DisplaySetting();
+                _settings.Displays[_selectedDisplay] = setting;
+            }
+
+            setting.Mode = chosen;
+
+            // Kept so the map can still be drawn when this screen is unplugged,
+            // and so the person can tell which entry is which.
+            if (card.Connected)
+            {
+                setting.FriendlyName = card.FriendlyName;
+                setting.LastRect = card.Rect;
+                setting.LastSeen = DateTime.UtcNow;
+            }
+
+            Save();
+            _map.Invalidate();
+        };
+
+        StackInto(
+            body,
+            relationship,
+            _map,
+            new Row(RowLabel("This screen shows"), _displayMode, null, _metrics, readoutColumn: false)
+            {
+                MiddleSample = "Polaroid Corkboard (long)",
+                Margin = new Padding(0, 8, 0, 4),
+            },
+            _screensNote);
+
+        return body;
+    }
+
+    /// <summary>
+    /// Reads the displays afresh and puts the section in step with them.
+    /// </summary>
+    /// <remarks>
+    /// Displays are scanned when the window opens rather than watched, because a
+    /// monitor being plugged in while the settings window is open is rare and
+    /// reopening the window is a cheap fix for it.
+    /// </remarks>
+    private void RefreshScreens()
+    {
+        _cards = DisplayMap.Listing(DisplayScan.Connected(), _settings.Displays);
+        _map.Cards = _cards;
+
+        var connected = _cards.Count(card => card.Connected);
+
+        _selectedDisplay ??= _cards.FirstOrDefault().Key;
+        if (_selectedDisplay is not null && _cards.All(card => card.Key != _selectedDisplay))
+        {
+            _selectedDisplay = _cards.FirstOrDefault().Key;
+        }
+
+        _map.Selected = _selectedDisplay;
+        _map.Invalidate();
+
+        var haveSelection = _selectedDisplay is not null;
+        _displayMode.Enabled = haveSelection;
+
+        if (haveSelection)
+        {
+            var stored = _settings.ForDisplay(_selectedDisplay!).Mode;
+            var index = DisplayMap.Choices().FindIndex(choice =>
+                string.Equals(choice.Id, stored, StringComparison.OrdinalIgnoreCase));
+
+            var was = _loading;
+            _loading = true;
+            _displayMode.SelectedIndex = index >= 0 ? index : 0;
+            _loading = was;
+        }
+
+        // Said plainly rather than by greying the option out. A control that is
+        // simply unavailable with no reason given reads as a fault.
+        var spanNote = _settings.MultiMonitor != MultiMonitorMode.Span
+            ? ""
+            : SpanLayout.CanSpan(_settings.Mode)
+                ? $"{_settings.Mode.Title()} will be spread across your screens. "
+                : $"{_settings.Mode.Title()} centres on one subject, so it is drawn complete on "
+                  + "each screen instead. Spreading works with "
+                  + string.Join(", ", SpanLayout.Spannable().Select(mode => mode.Title())) + ". ";
+
+        _screensNote.Text =
+            connected > 1
+                ? spanNote
+                  + "Click a screen to choose what it shows. Off leaves that screen black, "
+                  + "which still covers it, so the lock screen works normally."
+                : DisplayScan.IsDuplicated()
+                    ? "Your displays are set to Duplicate in Windows, so they count as one "
+                      + "screen and always show the same picture. Switch to Extend in Windows "
+                      + "display settings to control them separately."
+                    : "Only one screen is connected, so there is nothing to arrange yet. "
+                      + "Plug in a second monitor and it appears here.";
     }
 
     private Control TimeoutRow()
@@ -726,6 +918,10 @@ internal sealed class SettingsForm : Form
             foreach (var refresh in _refreshers) refresh();
             UpdateGridNote();
 
+            _independent.Checked = _settings.MultiMonitor == MultiMonitorMode.Separate;
+            _together.Checked = _settings.MultiMonitor == MultiMonitorMode.Linked;
+            _spanned.Checked = _settings.MultiMonitor == MultiMonitorMode.Span;
+
             _sourcePicker.SelectedIndex = MusicSourceKinds.All.ToList().IndexOf(TrayConfig.Source);
             _lastFmUser.Text = TrayConfig.LastFmUser;
 
@@ -960,6 +1156,114 @@ internal sealed class SettingsForm : Form
     /// A wrapping grey caption that works out its own height once it knows how
     /// wide it is, so it is never clipped and never leaves a gap.
     /// </summary>
+    /// <summary>
+    /// The arrangement map: every screen drawn where it really is.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Deliberately the same picture as the Windows Display settings page,
+    /// because every user has already seen and understood that one. Clicking a
+    /// rectangle picks that screen.
+    /// </para>
+    /// <para>
+    /// All the arithmetic is in <see cref="DisplayMap"/> in the shared library,
+    /// and none of it is here. The build machine has one display, so this
+    /// picture cannot be looked at while it is being written; keeping the
+    /// numbers somewhere they can be tested is the only way to know the screens
+    /// land in the right places.
+    /// </para>
+    /// </remarks>
+    private sealed class ArrangementMap : Panel
+    {
+        private List<MapTile> _tiles = [];
+
+        public ArrangementMap()
+        {
+            Dock = DockStyle.Top;
+            Height = 150;
+            BackColor = SystemColors.Window;
+            DoubleBuffered = true;
+            Cursor = Cursors.Hand;
+        }
+
+        public IReadOnlyList<DisplayCard> Cards { get; set; } = [];
+
+        public string? Selected { get; set; }
+
+        public event Action<string>? Picked;
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            Invalidate();
+        }
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+
+            if (DisplayMap.HitTest(_tiles, e.X, e.Y) is not { } key) return;
+
+            Selected = key;
+            Invalidate();
+            Picked?.Invoke(key);
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            var g = e.Graphics;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            _tiles = DisplayMap.Layout(Cards, ClientSize.Width, ClientSize.Height, 10f);
+
+            for (var i = 0; i < _tiles.Count; i++)
+            {
+                var tile = _tiles[i];
+                var card = Cards.FirstOrDefault(c => c.Key == tile.Key);
+                var chosen = tile.Key == Selected;
+
+                var box = new RectangleF(tile.X, tile.Y, tile.Width, tile.Height);
+
+                using var fill = new SolidBrush(
+                    !card.Connected ? SystemColors.ControlLight
+                    : chosen ? SystemColors.Highlight
+                    : SystemColors.ControlDark);
+
+                g.FillRectangle(fill, box);
+
+                using var edge = new Pen(chosen ? SystemColors.HotTrack : SystemColors.ControlDarkDark,
+                    chosen ? 2f : 1f);
+                g.DrawRectangle(edge, box.X, box.Y, box.Width, box.Height);
+
+                // The number, then the name under it if there is room. A label
+                // that does not fit is worse than no label.
+                using var ink = new SolidBrush(
+                    chosen ? SystemColors.HighlightText : SystemColors.ControlText);
+
+                var caption = $"{i + 1}";
+                var size = g.MeasureString(caption, Font);
+
+                g.DrawString(
+                    caption, Font, ink,
+                    box.X + ((box.Width - size.Width) / 2f),
+                    box.Y + ((box.Height - size.Height) / 2f) - (box.Height > 44 ? 8f : 0f));
+
+                if (box.Height <= 44 || card.FriendlyName.Length == 0) continue;
+
+                using var small = new Font(Font.FontFamily, Font.Size - 1f);
+                var name = g.MeasureString(card.FriendlyName, small);
+                if (name.Width > box.Width - 6f) continue;
+
+                g.DrawString(
+                    card.FriendlyName, small, ink,
+                    box.X + ((box.Width - name.Width) / 2f),
+                    box.Y + ((box.Height - size.Height) / 2f) + 10f);
+            }
+        }
+    }
+
     private sealed class Note : Label
     {
         public Note(string text)
