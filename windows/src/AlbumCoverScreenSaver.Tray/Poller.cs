@@ -9,7 +9,6 @@ namespace AlbumCoverScreenSaver.Tray;
 internal sealed class Poller : IDisposable
 {
     private readonly SharedStore _store;
-    private readonly IMusicSource _source;
     private readonly ArtworkService _artwork;
 
     private readonly Archive _archive;
@@ -17,17 +16,82 @@ internal sealed class Poller : IDisposable
     private DateTime _lastWriteAt = DateTime.MinValue;
     private string _lastTrackKey = "";
 
-    public Poller(SharedStore store, IMusicSource source)
+    private IMusicSource _source;
+    private IHistorySource? _history;
+    private MusicSourceKind _sourceKind;
+    private IDisposable? _owned;
+
+    private DateTime _lastSweepAt = DateTime.MinValue;
+    private bool _seeded;
+
+    public Poller(SharedStore store)
     {
         _store = store;
-        _source = source;
         _artwork = new ArtworkService(store);
 
         _store.EnsureDirectories();
         _archive = _store.LoadArchive();
 
+        _sourceKind = TrayConfig.Source;
+        _source = Build(_sourceKind);
+
         Log.Write($"folder: {_store.Describe()}");
         Log.Write($"archive holds {_archive.Count} album(s) to start with");
+        Log.Write($"music source: {_sourceKind.Title()}");
+    }
+
+    /// <summary>
+    /// Builds the source the settings ask for.
+    /// </summary>
+    /// <remarks>
+    /// A Last.fm source that is not configured yet would report nothing playing
+    /// forever and look like a broken app, so an unconfigured one falls back to
+    /// reading this PC. The settings window is where the user finds out why.
+    /// </remarks>
+    private IMusicSource Build(MusicSourceKind kind)
+    {
+        _owned?.Dispose();
+        _owned = null;
+        _history = null;
+
+        if (kind == MusicSourceKind.LastFm && LastFmSource.IsConfigured)
+        {
+            var lastfm = new LastFmSource();
+            _owned = lastfm;
+            _history = lastfm;
+            return lastfm;
+        }
+
+        if (kind == MusicSourceKind.LastFm)
+        {
+            Log.Write("last.fm is chosen but not set up yet; reading this PC instead");
+        }
+
+        return new GsmtcMusicSource();
+    }
+
+    /// <summary>
+    /// Rebuilds the source when the settings have changed under us.
+    /// </summary>
+    /// <remarks>
+    /// Checked on every poll rather than pushed from the settings window,
+    /// because the username can change without the source doing so and a
+    /// half-typed one must not leave the app wired to a dead account.
+    /// </remarks>
+    private void FollowSettings()
+    {
+        var wanted = TrayConfig.Source;
+        var configured = wanted != MusicSourceKind.LastFm || LastFmSource.IsConfigured;
+        var haveLastFm = _history is not null;
+
+        if (wanted == _sourceKind && configured == haveLastFm) return;
+
+        _sourceKind = wanted;
+        _source = Build(wanted);
+        _seeded = false;
+        _lastSweepAt = DateTime.MinValue;
+
+        Log.Write($"music source is now {_sourceKind.Title()}");
     }
 
     /// <summary>The last snapshot published. What the tray menu shows.</summary>
@@ -44,6 +108,9 @@ internal sealed class Poller : IDisposable
     /// </summary>
     public async Task<bool> PollOnceAsync(CancellationToken token)
     {
+        FollowSettings();
+        await SweepHistoryAsync(token);
+
         MusicReading? reading;
         try
         {
@@ -135,6 +202,54 @@ internal sealed class Poller : IDisposable
     }
 
     /// <summary>
+    /// Reads the listening history, on its own much slower clock.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Half hourly, against three seconds for the now-playing poll. A history is
+    /// hundreds of plays and changes a few times an hour, so asking for it on
+    /// the fast clock would be six hundred times the requests for the same
+    /// answer.
+    /// </para>
+    /// <para>
+    /// The seed runs once, first, and only into an archive that would otherwise
+    /// leave the screen nearly empty. That ordering matters: seeding after a
+    /// sweep would be seeding an archive the sweep had just filled, and nothing
+    /// would happen.
+    /// </para>
+    /// </remarks>
+    private async Task SweepHistoryAsync(CancellationToken token)
+    {
+        if (_history is null) return;
+
+        var now = DateTime.UtcNow;
+        var due = now - _lastSweepAt >= PollingPlan.HistorySweep;
+
+        if (_seeded && !due) return;
+
+        var changed = false;
+
+        if (!_seeded)
+        {
+            _seeded = true;
+
+            if (LastFmSync.NeedsSeeding(_archive))
+            {
+                Status = "Reading your listening history";
+                changed = await _history.SeedAsync(_archive, token) > 0;
+            }
+        }
+
+        if (due || changed)
+        {
+            _lastSweepAt = now;
+            changed |= (await _history.SweepAsync(_archive, token)).Recorded > 0;
+        }
+
+        if (changed) _store.SaveArchive(_archive);
+    }
+
+    /// <summary>
     /// Says plainly that nothing is on, once, rather than repeating it forever.
     /// </summary>
     private void PublishSilence()
@@ -160,5 +275,9 @@ internal sealed class Poller : IDisposable
         return $"{track} - {artist}";
     }
 
-    public void Dispose() => _artwork.Dispose();
+    public void Dispose()
+    {
+        _artwork.Dispose();
+        _owned?.Dispose();
+    }
 }

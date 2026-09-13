@@ -65,6 +65,12 @@ internal sealed class SettingsForm : Form
     private readonly Note _saverStatus;
     private readonly ComboBox _timeout = new();
 
+    private readonly ComboBox _sourcePicker = new();
+    private readonly TextBox _lastFmUser = new();
+    private readonly Button _testAccount = new();
+    private readonly Note _sourceBlurb;
+    private readonly Note _accountStatus;
+
     private readonly List<Action> _refreshers = [];
     private readonly Dictionary<string, Control> _byKey = new(StringComparer.Ordinal);
 
@@ -119,6 +125,8 @@ internal sealed class SettingsForm : Form
         _styleHeader = Header("Options");
         _gridNote = new Note("") { IndentTo = _metrics, Margin = new Padding(0, 0, 0, 10) };
         _saverStatus = new Note("") { Margin = new Padding(0, 0, 0, 12) };
+        _sourceBlurb = new Note("") { IndentTo = _metrics, Margin = new Padding(0, 0, 0, 10) };
+        _accountStatus = new Note("") { IndentTo = _metrics, Margin = new Padding(0, 0, 0, 12) };
 
         Build();
     }
@@ -139,7 +147,9 @@ internal sealed class SettingsForm : Form
         var labels = everyControl
             .Where(control => control is SliderControl or StyleChoiceControl)
             .Select(control => control.Label)
-            .Append("Start after");
+            .Append("Start after")
+            .Append("Where music comes from")
+            .Append("Last.fm username");
 
         _metrics.Label = labels.Select(Width).DefaultIfEmpty(120).Max() + 6;
 
@@ -228,7 +238,9 @@ internal sealed class SettingsForm : Form
 
         StackInto(
             _page,
-            Header("Style", first: true),
+            Header("Music", first: true),
+            MusicSection(),
+            Header("Style"),
             _stylePicker,
             Header("Layout & Timing"),
             _shared,
@@ -247,6 +259,7 @@ internal sealed class SettingsForm : Form
         LoadIntoControls();
         RebuildStyleOptions();
         RefreshSaverStatus();
+        RefreshMusicSection();
     }
 
     /// <summary>
@@ -303,6 +316,136 @@ internal sealed class SettingsForm : Form
         };
 
         return bar;
+    }
+
+    /// <summary>
+    /// Where the music comes from, and who to ask.
+    /// </summary>
+    /// <remarks>
+    /// These two are not in settings.json and must not be. See
+    /// <see cref="TrayConfig"/>: that file is shared byte for byte with the
+    /// macOS build, which keeps the same two values in its own preferences.
+    /// </remarks>
+    private Control MusicSection()
+    {
+        var body = new Panel { Dock = DockStyle.Top, AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink };
+
+        _sourcePicker.DropDownStyle = ComboBoxStyle.DropDownList;
+        _sourcePicker.Height = _sourcePicker.PreferredHeight;
+        foreach (var kind in MusicSourceKinds.All) _sourcePicker.Items.Add(kind.Title());
+
+        _sourcePicker.SelectedIndexChanged += (_, _) =>
+        {
+            if (_loading || _sourcePicker.SelectedIndex < 0) return;
+
+            TrayConfig.Source = MusicSourceKinds.All[_sourcePicker.SelectedIndex];
+            RefreshMusicSection();
+        };
+
+        _lastFmUser.Margin = new Padding(0, 0, 0, 4);
+
+        // Saved on the way out of the box rather than on every keystroke, so a
+        // half-typed username never becomes the configured one. The same trap
+        // the macOS build hit from the other side: an uncommitted edit sitting
+        // in a field and needing Save pressed twice.
+        _lastFmUser.Leave += (_, _) => CommitUsername();
+        _lastFmUser.KeyDown += (_, key) =>
+        {
+            if (key.KeyCode != Keys.Enter) return;
+            key.SuppressKeyPress = true;
+            CommitUsername();
+        };
+
+        _testAccount.Text = "Check";
+        _testAccount.AutoSize = true;
+        _testAccount.Click += async (_, _) => await CheckAccountAsync();
+
+        StackInto(
+            body,
+            new Row(RowLabel("Where music comes from"), _sourcePicker, null, _metrics, readoutColumn: false)
+            {
+                MiddleSample = "This PC or Last.fm",
+                Margin = new Padding(0, 0, 0, 6),
+            },
+            _sourceBlurb,
+            new Row(RowLabel("Last.fm username"), _lastFmUser, _testAccount, _metrics, readoutColumn: true)
+            {
+                Margin = new Padding(0, 0, 0, 4),
+            },
+            _accountStatus);
+
+        return body;
+    }
+
+    private void CommitUsername()
+    {
+        var cleaned = MusicSourceKinds.CleanUsername(_lastFmUser.Text);
+
+        if (cleaned == TrayConfig.LastFmUser)
+        {
+            // Still put the cleaned form back, so pasting a profile address
+            // visibly becomes the username rather than sitting there looking
+            // like it was ignored.
+            if (_lastFmUser.Text != cleaned) _lastFmUser.Text = cleaned;
+            return;
+        }
+
+        TrayConfig.LastFmUser = cleaned;
+        _lastFmUser.Text = cleaned;
+        RefreshMusicSection();
+    }
+
+    private async Task CheckAccountAsync()
+    {
+        CommitUsername();
+
+        _accountStatus.Text = "Checking...";
+        _testAccount.Enabled = false;
+
+        try
+        {
+            using var source = new LastFmSource();
+            using var giveUp = new CancellationTokenSource(TimeSpan.FromSeconds(25));
+
+            var complaint = await source.TestAsync(_lastFmUser.Text, giveUp.Token);
+
+            _accountStatus.Text = complaint is null
+                ? $"{_lastFmUser.Text} answered. Your history will be read within half an hour."
+                : $"Last.fm said: {complaint}";
+        }
+        catch (Exception error)
+        {
+            _accountStatus.Text = $"Could not reach Last.fm: {error.Message}";
+        }
+        finally
+        {
+            _testAccount.Enabled = true;
+        }
+    }
+
+    /// <summary>
+    /// Shows only what the chosen source needs, and says plainly when something
+    /// is missing.
+    /// </summary>
+    private void RefreshMusicSection()
+    {
+        var kind = TrayConfig.Source;
+        var lastfm = kind == MusicSourceKind.LastFm;
+
+        _sourceBlurb.Text = kind.Blurb();
+
+        _lastFmUser.Enabled = lastfm;
+        _testAccount.Enabled = lastfm;
+
+        if (_lastFmUser.Parent is Row row) row.Dimmed = !lastfm;
+
+        _accountStatus.Text = !lastfm
+            ? ""
+            : !TrayConfig.HasLastFmKey
+                ? "This build has no Last.fm key in it, so Last.fm cannot be used."
+                : TrayConfig.LastFmUser.Length == 0
+                    ? "Type your Last.fm username, then press Check."
+                    : $"Set to {TrayConfig.LastFmUser}.";
     }
 
     private Control TimeoutRow()
@@ -582,6 +725,9 @@ internal sealed class SettingsForm : Form
             _stylePicker.SelectedIndex = CollageModes.All.ToList().IndexOf(_settings.Mode);
             foreach (var refresh in _refreshers) refresh();
             UpdateGridNote();
+
+            _sourcePicker.SelectedIndex = MusicSourceKinds.All.ToList().IndexOf(TrayConfig.Source);
+            _lastFmUser.Text = TrayConfig.LastFmUser;
 
             var minutes = Math.Max(1, SaverInstaller.CurrentTimeoutSeconds() / 60);
             var choice = Array.IndexOf(TimeoutChoices, minutes);

@@ -27,6 +27,38 @@
     <EmbeddedResource Include="app.ico" />
   </ItemGroup>
 
+  <!--
+    The Last.fm API key, baked into the binary at build time.
+
+    One key serves every user of the app, so nobody has to register anything,
+    which is the whole reason Last.fm is shippable to strangers at all. It is
+    read from a `LastFMKey` file beside the build scripts, and that file is
+    excluded from the repository: exactly what the macOS build does with a file
+    of the same name, for the same reason.
+
+    A build made without the file simply has no key. The settings window says so
+    plainly rather than failing at the first request, and This PC keeps working.
+  -->
+  <PropertyGroup>
+    <LastFmKeyFile>$(MSBuildThisFileDirectory)..\..\LastFMKey</LastFmKeyFile>
+    <LastFmApiKey Condition="Exists('$(LastFmKeyFile)')">$([System.IO.File]::ReadAllText('$(LastFmKeyFile)'))</LastFmApiKey>
+    <LastFmApiKey>$(LastFmApiKey.Trim())</LastFmApiKey>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(LastFmApiKey)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>LastFMAPIKey</_Parameter1>
+      <_Parameter2>$(LastFmApiKey)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <Target Name="ReportLastFmKey" BeforeTargets="Build">
+    <Message Importance="high" Condition="'$(LastFmApiKey)' == ''"
+             Text="No LastFMKey file at $(LastFmKeyFile); this build will not offer Last.fm." />
+    <Message Importance="high" Condition="'$(LastFmApiKey)' != ''"
+             Text="Last.fm key baked in from $(LastFmKeyFile)." />
+  </Target>
+
   <ItemGroup>
     <ProjectReference Include="..\AlbumCoverScreenSaver.Shared\AlbumCoverScreenSaver.Shared.csproj" />
   </ItemGroup>

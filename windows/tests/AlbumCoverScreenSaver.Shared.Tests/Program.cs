@@ -25,6 +25,9 @@ public static class Program
         CrtTests.Register(runner);
         CdPlayerTests.Register(runner);
         DeviceTests.Register(runner);
+        LastFmTests.Register(runner);
+        LastFmSyncTests.Register(runner);
+        MusicSourceTests.Register(runner);
         TrayLogicTests.Register(runner);
         SettingsSchemaTests.Register(runner);
         ArchiveTests.Register(runner);

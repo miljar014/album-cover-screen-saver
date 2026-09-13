@@ -11,3 +11,8 @@ Releases/
 
 # Logs written by the build and by the saver itself
 *.log
+
+# The Last.fm API key, baked into the tray app at build time. One key serves
+# every user, but it still has no business in a repository. The macOS build
+# keeps a file of the same name out of its own repo for the same reason.
+LastFMKey

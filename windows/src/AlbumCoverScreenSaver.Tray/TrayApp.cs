@@ -50,7 +50,7 @@ internal sealed class TrayApp : ApplicationContext
 
     public TrayApp()
     {
-        _poller = new Poller(SharedStore.Default, new GsmtcMusicSource());
+        _poller = new Poller(SharedStore.Default);
 
         _status = new ToolStripMenuItem("Starting up") { Enabled = false };
         _nowPlaying = new ToolStripMenuItem("Nothing playing") { Enabled = false };
