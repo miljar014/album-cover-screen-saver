@@ -65,6 +65,40 @@ public static class MusicSourceKinds
     }
 
     /// <summary>
+    /// Whether the running source needs replacing.
+    /// </summary>
+    /// <param name="wanted">What the settings ask for now.</param>
+    /// <param name="current">What was built last time.</param>
+    /// <param name="usingHistory">Whether the built source can read a history.</param>
+    /// <param name="historyAvailable">
+    /// Whether one could be built: the settings ask for Last.fm <em>and</em> it
+    /// has a key and a username.
+    /// </param>
+    /// <remarks>
+    /// <para>
+    /// Two conditions, not one. The chosen source can change, and so can whether
+    /// the chosen one is usable yet, because a username is typed some time after
+    /// the source is picked. Watching only the first would leave the app reading
+    /// this PC forever after a username was finally entered.
+    /// </para>
+    /// <para>
+    /// <b>This is a function rather than four lines inside the poller because
+    /// the four lines were wrong.</b> They compared "is the chosen source
+    /// usable" against "is a history source built", which is true against false
+    /// whenever the chosen source is this PC, so the poller rebuilt itself every
+    /// twenty seconds and said so in the log every time. Harmless, and visible
+    /// only because it was written down.
+    /// </para>
+    /// </remarks>
+    public static bool ShouldRebuild(
+        MusicSourceKind wanted, MusicSourceKind current, bool usingHistory, bool historyAvailable)
+    {
+        var shouldUseHistory = wanted == MusicSourceKind.LastFm && historyAvailable;
+
+        return wanted != current || shouldUseHistory != usingHistory;
+    }
+
+    /// <summary>
     /// Whether a username looks like something Last.fm could accept.
     /// </summary>
     /// <remarks>

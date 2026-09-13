@@ -81,10 +81,14 @@ internal sealed class Poller : IDisposable
     private void FollowSettings()
     {
         var wanted = TrayConfig.Source;
-        var configured = wanted != MusicSourceKind.LastFm || LastFmSource.IsConfigured;
-        var haveLastFm = _history is not null;
 
-        if (wanted == _sourceKind && configured == haveLastFm) return;
+        if (!MusicSourceKinds.ShouldRebuild(
+                wanted, _sourceKind,
+                usingHistory: _history is not null,
+                historyAvailable: LastFmSource.IsConfigured))
+        {
+            return;
+        }
 
         _sourceKind = wanted;
         _source = Build(wanted);

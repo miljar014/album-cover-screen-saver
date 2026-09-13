@@ -36,6 +36,71 @@ public static class MusicSourceTests
             Check.Equal(MusicSourceKind.LastFm, MusicSourceKinds.ParseOr(" LastFM "), "and a sloppy one");
         });
 
+        runner.Add("a settled source is not rebuilt on every look", () =>
+        {
+            // The bug this function exists to stop. The poller checks the
+            // settings on every poll, which is every twenty seconds when nothing
+            // is playing, and the first version of this test said yes every one
+            // of those times while the source was This PC.
+            Check.False(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.Local, MusicSourceKind.Local,
+                    usingHistory: false, historyAvailable: false),
+                "this PC, settled");
+
+            Check.False(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.Local, MusicSourceKind.Local,
+                    usingHistory: false, historyAvailable: true),
+                "this PC, with a Last.fm account also configured");
+
+            Check.False(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.LastFm, MusicSourceKind.LastFm,
+                    usingHistory: true, historyAvailable: true),
+                "Last.fm, settled");
+
+            Check.False(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.LastFm, MusicSourceKind.LastFm,
+                    usingHistory: false, historyAvailable: false),
+                "Last.fm chosen but not set up, already fallen back");
+        });
+
+        runner.Add("a source that has actually changed is rebuilt", () =>
+        {
+            Check.True(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.LastFm, MusicSourceKind.Local,
+                    usingHistory: false, historyAvailable: true),
+                "switched to Last.fm");
+
+            Check.True(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.Local, MusicSourceKind.LastFm,
+                    usingHistory: true, historyAvailable: true),
+                "switched back to this PC");
+        });
+
+        runner.Add("typing a username at last is noticed", () =>
+        {
+            // The second condition, and the reason one is not enough. Last.fm is
+            // picked first and the username typed afterwards, so the chosen
+            // source has not changed at the moment it becomes usable. Watching
+            // only the choice would leave the app reading this PC forever.
+            Check.True(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.LastFm, MusicSourceKind.LastFm,
+                    usingHistory: false, historyAvailable: true),
+                "a username arrived");
+
+            Check.True(
+                MusicSourceKinds.ShouldRebuild(
+                    MusicSourceKind.LastFm, MusicSourceKind.LastFm,
+                    usingHistory: true, historyAvailable: false),
+                "and a username was cleared");
+        });
+
         runner.Add("a pasted profile address becomes a username", () =>
         {
             // People paste the address of their profile page far more often than
